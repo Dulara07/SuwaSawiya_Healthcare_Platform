@@ -111,7 +111,7 @@ export function Header() {
               login('partner');
               setIsMenuOpen(false);
             }}>
-                    Partner Login
+                    Admin
                   </Button>
                 </div>
               </div>}
