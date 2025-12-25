@@ -1,5 +1,4 @@
-import { Campaign } from '../types';
-export const MOCK_CAMPAIGNS: Campaign[] = [{
+export const MOCK_CAMPAIGNS = [{
   id: 'c1',
   title: 'Urgent Heart Surgery for Little Amara',
   patientName: 'Amara Perera',

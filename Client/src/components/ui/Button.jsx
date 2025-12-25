@@ -1,21 +1,6 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
-  isLoading?: boolean;
-  fullWidth?: boolean;
-}
-export function Button({
-  children,
-  variant = 'primary',
-  size = 'md',
-  isLoading = false,
-  fullWidth = false,
-  className = '',
-  disabled,
-  ...props
-}: ButtonProps) {
+export function Button({ children, variant = 'primary', size = 'md', isLoading = false, fullWidth = false, className = '', disabled, ...props }) {
   const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
   const variants = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-600',

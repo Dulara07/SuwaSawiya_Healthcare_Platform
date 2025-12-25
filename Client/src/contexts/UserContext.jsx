@@ -1,21 +1,9 @@
 import React, { useState, createContext, useContext } from 'react';
-import { User, UserRole } from '../types';
-interface UserContextType {
-  user: User | null;
-  login: (role: UserRole) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
-const UserContext = createContext<UserContextType | undefined>(undefined);
-export function UserProvider({
-  children
-}: {
-  children: ReactNode;
-}) {
-  const [user, setUser] = useState<User | null>(null);
-  const login = (role: UserRole) => {
-    // Mock login logic
-    const mockUser: User = {
+const UserContext = createContext(undefined);
+export function UserProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const login = (role) => {
+    const mockUser = {
       id: 'u1',
       name: role === 'partner' ? 'City General Hospital' : 'John Doe',
       email: role === 'partner' ? 'admin@cityhospital.lk' : 'john@example.com',
@@ -27,14 +15,7 @@ export function UserProvider({
   const logout = () => {
     setUser(null);
   };
-  return <UserContext.Provider value={{
-    user,
-    login,
-    logout,
-    isAuthenticated: !!user
-  }}>
-      {children}
-    </UserContext.Provider>;
+  return <UserContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>{children}</UserContext.Provider>;
 }
 export function useUser() {
   const context = useContext(UserContext);

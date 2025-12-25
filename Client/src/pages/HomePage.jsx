@@ -6,10 +6,7 @@ import { CampaignCard } from '../components/CampaignCard';
 import { MOCK_CAMPAIGNS } from '../data/mockData';
 import { useLanguage } from '../contexts/LanguageContext';
 export function HomePage() {
-  const {
-    t
-  } = useLanguage();
-  // Sort by priority score (ML mock)
+  const { t } = useLanguage();
   const featuredCampaigns = [...MOCK_CAMPAIGNS].sort((a, b) => b.priorityScore - a.priorityScore).slice(0, 3);
   return <div className="flex flex-col min-h-screen">
       {/* Hero Section */}

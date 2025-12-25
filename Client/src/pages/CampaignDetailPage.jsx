@@ -7,9 +7,7 @@ import { UrgencyBadge } from '../components/ui/Badge';
 import { DonationModal } from '../components/DonationModal';
 import { ShieldCheck, Calendar, User, Share2, AlertCircle } from 'lucide-react';
 export function CampaignDetailPage() {
-  const {
-    id
-  } = useParams();
+  const { id } = useParams();
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
   const campaign = MOCK_CAMPAIGNS.find(c => c.id === id);
   if (!campaign) {

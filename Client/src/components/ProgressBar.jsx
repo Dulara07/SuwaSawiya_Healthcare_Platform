@@ -1,21 +1,7 @@
 import React, { useEffect, useState } from 'react';
-interface ProgressBarProps {
-  current: number;
-  total: number;
-  label?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  showPercentage?: boolean;
-}
-export function ProgressBar({
-  current,
-  total,
-  label = true,
-  size = 'md',
-  showPercentage = true
-}: ProgressBarProps) {
+export function ProgressBar({ current, total, label = true, size = 'md', showPercentage = true }) {
   const percentage = Math.min(Math.round(current / total * 100), 100);
   const [width, setWidth] = useState(0);
-  // Animate on mount
   useEffect(() => {
     const timer = setTimeout(() => setWidth(percentage), 100);
     return () => clearTimeout(timer);

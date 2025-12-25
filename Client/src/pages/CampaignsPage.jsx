@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { CampaignCard } from '../components/CampaignCard';
 import { MOCK_CAMPAIGNS } from '../data/mockData';
-import { CampaignCategory, UrgencyLevel } from '../types';
 export function CampaignsPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<CampaignCategory | 'All'>('All');
-  const [selectedUrgency, setSelectedUrgency] = useState<UrgencyLevel | 'All'>('All');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedUrgency, setSelectedUrgency] = useState('All');
   const filteredCampaigns = MOCK_CAMPAIGNS.filter(campaign => {
     const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) || campaign.patientName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || campaign.category === selectedCategory;
@@ -26,7 +25,7 @@ export function CampaignsPage() {
             </div>
 
             <div className="flex gap-4 overflow-x-auto pb-2 md:pb-0">
-              <select className="px-4 py-2 border border-gray-300 rounded-md bg-white focus:ring-blue-500 focus:border-blue-500" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value as any)}>
+              <select className="px-4 py-2 border border-gray-300 rounded-md bg-white focus:ring-blue-500 focus:border-blue-500" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
                 <option value="All">All Categories</option>
                 <option value="Surgery">Surgery</option>
                 <option value="Cancer Treatment">Cancer</option>
@@ -34,7 +33,7 @@ export function CampaignsPage() {
                 <option value="Transplant">Transplant</option>
               </select>
 
-              <select className="px-4 py-2 border border-gray-300 rounded-md bg-white focus:ring-blue-500 focus:border-blue-500" value={selectedUrgency} onChange={e => setSelectedUrgency(e.target.value as any)}>
+              <select className="px-4 py-2 border border-gray-300 rounded-md bg-white focus:ring-blue-500 focus:border-blue-500" value={selectedUrgency} onChange={e => setSelectedUrgency(e.target.value)}>
                 <option value="All">All Urgency</option>
                 <option value="Critical">Critical</option>
                 <option value="High">High</option>

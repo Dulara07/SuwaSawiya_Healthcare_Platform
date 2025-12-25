@@ -1,14 +1,6 @@
 import React from 'react';
-type StatusType = 'active' | 'stable' | 'critical' | 'pending' | 'discharged';
-interface StatusBadgeProps {
-  status: string;
-  type: StatusType;
-}
-export function StatusBadge({
-  status,
-  type
-}: StatusBadgeProps) {
-  const getStyles = (type: StatusType) => {
+export function StatusBadge({ status, type }) {
+  const getStyles = (type) => {
     switch (type) {
       case 'active':
       case 'stable':
@@ -27,7 +19,5 @@ export function StatusBadge({
         inline-flex items-center px-2.5 py-0.5 
         rounded-[2px] text-xs font-bold uppercase tracking-wide border
         ${getStyles(type)}
-      `}>
-      {status}
-    </span>;
+      `}>{status}</span>;
 }

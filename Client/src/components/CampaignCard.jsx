@@ -1,15 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Campaign } from '../types';
 import { UrgencyBadge } from './ui/Badge';
 import { ProgressBar } from './ProgressBar';
 import { ShieldCheck, Clock } from 'lucide-react';
-interface CampaignCardProps {
-  campaign: Campaign;
-}
-export function CampaignCard({
-  campaign
-}: CampaignCardProps) {
+export function CampaignCard({ campaign }) {
   const percent = Math.round(campaign.raisedAmount / campaign.goalAmount * 100);
   return <Link to={`/campaigns/${campaign.id}`} className="group flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 h-full">
       {/* Image Container */}

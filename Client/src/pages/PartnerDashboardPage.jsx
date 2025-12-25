@@ -4,7 +4,6 @@ import { StatusBadge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Plus, DollarSign, Users, FileText } from 'lucide-react';
 export function PartnerDashboardPage() {
-  // Filter campaigns for a mock partner
   const myCampaigns = MOCK_CAMPAIGNS.slice(0, 3);
   const totalRaised = myCampaigns.reduce((acc, curr) => acc + curr.raisedAmount, 0);
   return <div className="bg-gray-50 min-h-screen py-8">

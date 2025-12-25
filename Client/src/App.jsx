@@ -9,17 +9,8 @@ import { CampaignDetailPage } from './pages/CampaignDetailPage';
 import { PartnerRegisterPage } from './pages/PartnerRegisterPage';
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
 // Protected Route Wrapper
-function ProtectedRoute({
-  children,
-  role
-}: {
-  children: React.ReactNode;
-  role?: string;
-}) {
-  const {
-    user,
-    isAuthenticated
-  } = useUser();
+function ProtectedRoute({ children, role }) {
+  const { user, isAuthenticated } = useUser();
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }

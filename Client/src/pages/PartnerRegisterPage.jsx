@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 export function PartnerRegisterPage() {
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (step < 3) {
       setStep(step + 1);
