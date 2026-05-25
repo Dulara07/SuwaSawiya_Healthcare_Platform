@@ -44,8 +44,9 @@ export async function register(data) {
   }
   return response.json();
 }
-export async function login(username, password) {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+export async function login(username, password, role = 'donor') {
+  const loginPath = role === 'admin' ? '/auth/login/admin' : role === 'partner' ? '/auth/login/partner' : '/auth/login/donor';
+  const response = await fetch(`${API_BASE_URL}${loginPath}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -55,9 +56,42 @@ export async function login(username, password) {
       password,
     }),
   });
-  if (!response.ok) throw new Error('Login failed');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Login failed');
+  }
   const data = await response.json();
   return data.access_token;
+}
+
+export async function fetchCurrentUser() {
+  const response = await fetch(`${API_BASE_URL}/users/me`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Failed to fetch current user');
+  return response.json();
+}
+
+export async function createDonation({ amount, campaignId, isAnonymous = false }) {
+  const response = await fetch(`${API_BASE_URL}/donations/`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      amount: Number(amount),
+      campaign_id: campaignId,
+      is_anonymous: isAnonymous,
+    }),
+  });
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Please log in before donating');
+    }
+    throw new Error('Failed to create donation');
+  }
+  return response.json();
 }
 
 function normalizeCampaign(campaign) {
@@ -98,6 +132,7 @@ function normalizeCampaign(campaign) {
     medical_urgency: medicalUrgency,
     time_sensitivity: timeSensitivity,
     target_amount: targetAmount,
+    updates: Array.isArray(campaign.updates) ? campaign.updates : [],
   };
 }
 

@@ -15,6 +15,8 @@ class UserRead(UserBase):
     id: int
     is_active: bool
     registration_status: str
+    total_donated: float
+    donation_count: int
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

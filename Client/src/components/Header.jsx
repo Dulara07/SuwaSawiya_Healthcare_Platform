@@ -27,6 +27,7 @@ export function Header() {
             <Link to="/" className={`text-sm font-medium ${isActive('/') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}>{t('nav.home')}</Link>
             <Link to="/campaigns" className={`text-sm font-medium ${isActive('/campaigns') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}>{t('nav.campaigns')}</Link>
             <Link to="/about" className={`text-sm font-medium ${isActive('/about') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}>{t('nav.about')}</Link>
+            {user && <Link to="/profile" className={`text-sm font-medium ${isActive('/profile') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}>Profile</Link>}
             {user?.role === 'partner' && <Link to="/partner/dashboard" className={`text-sm font-medium ${isActive('/partner/dashboard') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}>{t('nav.dashboard')}</Link>}
             {user?.role === 'admin' && <Link to="/admin/dashboard" className={`text-sm font-medium ${isActive('/admin/dashboard') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}>Admin Dashboard</Link>}
           </div>
@@ -38,12 +39,15 @@ export function Header() {
                   <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                     <UserIcon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                  </div>
                 </div>
                 <button onClick={logout} className="text-gray-400 hover:text-gray-600" title="Logout"><LogOut className="h-5 w-5" /></button>
               </div> : <div className="flex items-center space-x-2 ml-4">
-                <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>User Login</Button>
-                <Button variant="primary" size="sm" onClick={() => navigate('/login')}>Admin Login</Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/login/donor')}>Donor Login</Button>
+                <Button variant="outline" size="sm" onClick={() => navigate('/login/partner')}>Partner Login</Button>
+                <Button variant="primary" size="sm" onClick={() => navigate('/login/admin')}>Admin Login</Button>
               </div>}
           </div>
 
@@ -60,12 +64,14 @@ export function Header() {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link to="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" onClick={() => setIsMenuOpen(false)}>{t('nav.home')}</Link>
             <Link to="/campaigns" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" onClick={() => setIsMenuOpen(false)}>{t('nav.campaigns')}</Link>
+            {user && <Link to="/profile" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" onClick={() => setIsMenuOpen(false)}>Profile</Link>}
             {user?.role === 'partner' && <Link to="/partner/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-blue-600 bg-blue-50" onClick={() => setIsMenuOpen(false)}>{t('nav.dashboard')}</Link>}
             {user?.role === 'admin' && <Link to="/admin/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-blue-600 bg-blue-50" onClick={() => setIsMenuOpen(false)}>Admin Dashboard</Link>}
             {!user && <div className="pt-4 pb-2 border-t border-gray-100 mt-2">
                 <div className="space-y-2 px-3">
-                  <Button fullWidth variant="outline" onClick={() => { navigate('/login'); setIsMenuOpen(false); }}>Donor Login</Button>
-                  <Button fullWidth variant="primary" onClick={() => { navigate('/login'); setIsMenuOpen(false); }}>Admin</Button>
+                  <Button fullWidth variant="outline" onClick={() => { navigate('/login/donor'); setIsMenuOpen(false); }}>Donor Login</Button>
+                  <Button fullWidth variant="outline" onClick={() => { navigate('/login/partner'); setIsMenuOpen(false); }}>Partner Login</Button>
+                  <Button fullWidth variant="primary" onClick={() => { navigate('/login/admin'); setIsMenuOpen(false); }}>Admin Login</Button>
                 </div>
               </div>}
             {user && <div className="pt-4 pb-2 border-t border-gray-100 mt-2 px-3">

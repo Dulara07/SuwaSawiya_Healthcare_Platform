@@ -5,3 +5,101 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 /* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL - DO NOT DELETE THIS COMMENT */
+
+:root {
+	color-scheme: light;
+}
+
+html,
+body,
+#root {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	background:
+		radial-gradient(circle at top left, rgba(209, 250, 229, 0.65), transparent 36%),
+		radial-gradient(circle at top right, rgba(219, 234, 254, 0.55), transparent 34%),
+		linear-gradient(180deg, #f8fffd 0%, #f5fbff 45%, #f8fbf8 100%);
+}
+
+@keyframes healing-drift {
+	0%,
+	100% {
+		transform: translate3d(0, 0, 0) scale(1);
+		opacity: 0.55;
+	}
+	33% {
+		transform: translate3d(18px, -24px, 0) scale(1.06);
+		opacity: 0.8;
+	}
+	66% {
+		transform: translate3d(-16px, 18px, 0) scale(0.98);
+		opacity: 0.65;
+	}
+}
+
+@keyframes healing-pulse {
+	0%,
+	100% {
+		filter: blur(64px) saturate(110%);
+		opacity: 0.28;
+	}
+	50% {
+		filter: blur(72px) saturate(125%);
+		opacity: 0.42;
+	}
+}
+
+.healing-backdrop {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	overflow: hidden;
+	z-index: 0;
+}
+
+.healing-backdrop__blob {
+	position: absolute;
+	border-radius: 9999px;
+	filter: blur(68px);
+	mix-blend-mode: screen;
+	animation: healing-drift 18s ease-in-out infinite;
+}
+
+.healing-backdrop__blob--mint {
+	top: -8rem;
+	left: -6rem;
+	width: 22rem;
+	height: 22rem;
+	background: rgba(167, 243, 208, 0.55);
+	animation-duration: 20s;
+}
+
+.healing-backdrop__blob--sky {
+	top: 18%;
+	right: -5rem;
+	width: 26rem;
+	height: 26rem;
+	background: rgba(186, 230, 253, 0.5);
+	animation-duration: 24s;
+	animation-delay: -6s;
+}
+
+.healing-backdrop__blob--rose {
+	bottom: -7rem;
+	left: 24%;
+	width: 20rem;
+	height: 20rem;
+	background: rgba(252, 231, 243, 0.5);
+	animation-duration: 22s;
+	animation-delay: -10s;
+}
+
+.healing-backdrop__glow {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(120deg, rgba(255, 255, 255, 0.45), rgba(236, 253, 245, 0.18), rgba(239, 246, 255, 0.3));
+	animation: healing-pulse 14s ease-in-out infinite;
+}

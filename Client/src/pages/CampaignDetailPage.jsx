@@ -1,20 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MOCK_CAMPAIGNS } from '../data/mockData';
 import { Button } from '../components/ui/Button';
 import { ProgressBar } from '../components/ProgressBar';
 import { UrgencyBadge } from '../components/ui/Badge';
 import { DonationModal } from '../components/DonationModal';
 import { ShieldCheck, Calendar, User, Share2, AlertCircle } from 'lucide-react';
+import { fetchCampaigns } from '../api';
 export function CampaignDetailPage() {
   const { id } = useParams();
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
-  const campaign = MOCK_CAMPAIGNS.find(c => c.id === id);
+  const [campaign, setCampaign] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const loadCampaign = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const campaigns = await fetchCampaigns();
+      const match = campaigns.find(item => String(item.id) === String(id));
+      setCampaign(match || null);
+    } catch (err) {
+      setError('Failed to load campaign details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let isActive = true;
+
+    loadCampaign();
+
+    return () => {
+      isActive = false;
+    };
+  }, [id]);
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading campaign...</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-600">{error}</div>;
+  }
+
   if (!campaign) {
     return <div className="p-8 text-center">Campaign not found</div>;
   }
   return <div className="bg-gray-50 min-h-screen pb-12">
-      <DonationModal campaign={campaign} isOpen={isDonateModalOpen} onClose={() => setIsDonateModalOpen(false)} />
+      <DonationModal campaign={campaign} isOpen={isDonateModalOpen} onClose={() => setIsDonateModalOpen(false)} onDonationSuccess={loadCampaign} />
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
@@ -95,7 +131,7 @@ export function CampaignDetailPage() {
             {/* Updates Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
               <h3 className="text-xl font-bold text-gray-900 mb-6">Updates</h3>
-              {campaign.updates.length > 0 ? <div className="space-y-6">
+              {campaign.updates?.length > 0 ? <div className="space-y-6">
                   {campaign.updates.map(update => <div key={update.id} className="border-l-2 border-blue-200 pl-4 pb-2">
                       <p className="text-xs text-gray-500 mb-1">
                         {new Date(update.date).toLocaleDateString()}

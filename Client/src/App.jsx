@@ -11,6 +11,7 @@ import { PartnerRegisterPage } from './pages/PartnerRegisterPage';
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminCampaignEditPage } from './pages/AdminCampaignEditPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
 // Protected Route Wrapper
 function ProtectedRoute({ children, role }) {
@@ -35,11 +36,15 @@ export function App() {
               <Route path="/campaigns" element={<CampaignsPage />} />
               <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
               <Route path="/partner/register" element={<PartnerRegisterPage />} />
+              <Route path="/profile" element={<ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>} />
               <Route path="/about" element={<div className="p-8 text-center">About Page Placeholder</div>} />
 
 
               {/* Admin Login Route */}
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/login" element={<Navigate to="/login/donor" replace />} />
+              <Route path="/login/:role" element={<LoginPage />} />
 
               {/* Protected Partner Routes */}
               <Route path="/partner/dashboard" element={<ProtectedRoute role="partner">

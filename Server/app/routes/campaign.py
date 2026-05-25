@@ -166,7 +166,6 @@ def list_campaigns_by_priority(db: Session = Depends(get_db)):
 def get_partner_dashboard(db: Session = Depends(get_db), current_user = Depends(require_role("partner"))):
     campaigns = (
         db.query(Campaign)
-        .filter(Campaign.owner_id == current_user.id)
         .order_by(Campaign.created_at.desc())
         .all()
     )
@@ -194,6 +193,7 @@ def get_partner_dashboard(db: Session = Depends(get_db), current_user = Depends(
                 "title": campaign.title,
                 "description": campaign.description,
                 "category": campaign.category,
+                "owner_id": campaign.owner_id,
                 "beneficiary_name": campaign.beneficiary_name,
                 "beneficiary_age": campaign.beneficiary_age,
                 "beneficiary_medical_condition": campaign.beneficiary_medical_condition,
@@ -203,7 +203,6 @@ def get_partner_dashboard(db: Session = Depends(get_db), current_user = Depends(
                 "raised_amount": raised_amount,
                 "status": campaign.status,
                 "priority_score": campaign.priority_score,
-                "owner_id": campaign.owner_id,
                 "created_at": campaign.created_at.isoformat() if campaign.created_at else None,
                 "updated_at": campaign.updated_at.isoformat() if campaign.updated_at else None,
                 "progress_percentage": progress_percentage,

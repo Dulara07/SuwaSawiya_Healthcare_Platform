@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, ShieldCheck, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from './ui/Button';
-export function DonationModal({ campaign, isOpen, onClose }) {
+import { useUser } from '../contexts/UserContext';
+import { createDonation } from '../api';
+export function DonationModal({ campaign, isOpen, onClose, onDonationSuccess }) {
   const [amount, setAmount] = useState('');
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -10,6 +13,8 @@ export function DonationModal({ campaign, isOpen, onClose }) {
   const [donorEmail, setDonorEmail] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [errors, setErrors] = useState({});
+  const { refreshUser, isAuthenticated } = useUser();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
@@ -38,12 +43,23 @@ export function DonationModal({ campaign, isOpen, onClose }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleDonate = () => {
+  const handleDonate = async () => {
+    if (!isAuthenticated) {
+      setErrors({ submit: 'Please log in before donating' });
+      return;
+    }
     if (!validateStep2()) return;
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await createDonation({
+        amount,
+        campaignId: campaign.id,
+        isAnonymous,
+      });
       setIsLoading(false);
       setSuccess(true);
+      await refreshUser?.();
+      await onDonationSuccess?.();
       setTimeout(() => {
         setSuccess(false);
         setAmount('');
@@ -53,7 +69,10 @@ export function DonationModal({ campaign, isOpen, onClose }) {
         setStep(1);
         onClose();
       }, 2500);
-    }, 1500);
+    } catch (error) {
+      setIsLoading(false);
+      setErrors({ submit: error.message || 'Failed to process donation' });
+    }
   };
 
   const presetAmounts = [1000, 2500, 5000, 10000];
@@ -139,6 +158,8 @@ export function DonationModal({ campaign, isOpen, onClose }) {
                   <Lock className="w-4 h-4" /> Pay {campaign.currency} {Number(amount).toLocaleString()}
                 </Button>
               </div>
+              {errors.submit && <p className="text-red-500 text-xs text-center">{errors.submit}</p>}
+              {!isAuthenticated && <Button variant="outline" onClick={() => { onClose(); navigate('/login'); }} fullWidth>Go to login</Button>}
             </div>
           )}
         </div>

@@ -15,6 +15,12 @@ def create_all_tables():
         if "registration_status" not in user_columns:
             connection.execute(text("ALTER TABLE users ADD COLUMN registration_status VARCHAR DEFAULT 'approved'"))
         connection.execute(text("UPDATE users SET registration_status = 'approved' WHERE registration_status IS NULL"))
+        if "total_donated" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN total_donated FLOAT DEFAULT 0"))
+        connection.execute(text("UPDATE users SET total_donated = 0 WHERE total_donated IS NULL"))
+        if "donation_count" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN donation_count INTEGER DEFAULT 0"))
+        connection.execute(text("UPDATE users SET donation_count = 0 WHERE donation_count IS NULL"))
         if "category" not in campaign_columns:
             connection.execute(text("ALTER TABLE campaigns ADD COLUMN category VARCHAR"))
         if "beneficiary_name" not in campaign_columns:

@@ -20,11 +20,14 @@ def make_donation(donation_in: DonationCreate, db: Session = Depends(get_db), cu
         campaign_id=donation_in.campaign_id,
         is_anonymous=donation_in.is_anonymous
     )
-    campaign.raised_amount += donation_in.amount
+    campaign.raised_amount = float(campaign.raised_amount or 0) + float(donation_in.amount)
+    current_user.total_donated = float(current_user.total_donated or 0) + float(donation_in.amount)
+    current_user.donation_count = int(current_user.donation_count or 0) + 1
     db.add(donation)
     db.commit()
     db.refresh(donation)
     db.refresh(campaign)
+    db.refresh(current_user)
     return donation
 
 @router.get("/", response_model=List[DonationRead])

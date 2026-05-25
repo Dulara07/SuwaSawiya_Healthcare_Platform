@@ -120,7 +120,7 @@ export function PartnerDashboardPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-blue-600 font-semibold">Partner overview</p>
-            <h1 className="text-2xl font-bold text-gray-900">Partner Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Campaign Dashboard</h1>
           </div>
           <Button variant="outline" className="flex items-center" onClick={loadDashboard}>
             <RefreshCcw className="w-4 h-4 mr-2" /> Refresh
@@ -142,7 +142,7 @@ export function PartnerDashboardPage() {
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-500">Partner Campaigns</h3>
+              <h3 className="text-sm font-medium text-gray-500">All Campaigns</h3>
               <div className="p-2 bg-blue-100 rounded-lg text-blue-600"><FileText className="w-5 h-5" /></div>
             </div>
             <p className="text-2xl font-bold text-gray-900">{campaigns.length}</p>
@@ -247,28 +247,36 @@ export function PartnerDashboardPage() {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="font-bold text-gray-900">Managed Campaigns</h3>
+            <h3 className="font-bold text-gray-900">All Campaign Details</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="bg-gray-50 text-gray-500 font-medium">
                 <tr>
                   <th className="px-6 py-3">Campaign</th>
+                  <th className="px-6 py-3">Beneficiary</th>
+                  <th className="px-6 py-3">Condition</th>
+                  <th className="px-6 py-3">Owner ID</th>
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3">Raised</th>
                   <th className="px-6 py-3">Goal</th>
                   <th className="px-6 py-3">Progress</th>
+                  <th className="px-6 py-3">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {campaigns.map(campaign => <tr key={campaign.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900">{campaign.title}</td>
+                    <td className="px-6 py-4 text-gray-600">{campaign.beneficiary_name || '-'}</td>
+                    <td className="px-6 py-4 text-gray-600">{campaign.beneficiary_medical_condition || campaign.description || '-'}</td>
+                    <td className="px-6 py-4 text-gray-500">{campaign.owner_id ?? '-'}</td>
                     <td className="px-6 py-4"><StatusBadge status={campaign.status} /></td>
                     <td className="px-6 py-4 text-green-600 font-medium">LKR {Number(campaign.raised_amount ?? campaign.raisedAmount ?? 0).toLocaleString()}</td>
                     <td className="px-6 py-4 text-gray-500">LKR {Number(campaign.target_amount ?? campaign.goalAmount ?? 0).toLocaleString()}</td>
                     <td className="px-6 py-4 text-gray-500">{Number(campaign.progress_percentage ?? 0).toFixed(0)}%</td>
+                    <td className="px-6 py-4 text-gray-500">{campaign.created_at ? new Date(campaign.created_at).toLocaleDateString() : '-'}</td>
                   </tr>)}
-                {!loading && campaigns.length === 0 && <tr><td className="px-6 py-6 text-gray-500" colSpan={5}>No partner campaigns found.</td></tr>}
+                {!loading && campaigns.length === 0 && <tr><td className="px-6 py-6 text-gray-500" colSpan={8}>No campaigns found.</td></tr>}
               </tbody>
             </table>
           </div>
