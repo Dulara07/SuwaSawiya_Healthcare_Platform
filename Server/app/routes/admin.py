@@ -4,6 +4,8 @@ from typing import List
 from app.models.campaign import Campaign
 from app.models.user import User
 from app.models.fraud_report import FraudReport
+from app.models.donation import Donation
+from app.models.document import Document
 from app.auth.dependencies import require_role
 from app.utils.db import get_db
 
@@ -14,6 +16,10 @@ def _campaign_payload(campaign: Campaign):
         "id": campaign.id,
         "title": campaign.title,
         "description": campaign.description,
+        "category": getattr(campaign, "category", None),
+        "beneficiary_name": getattr(campaign, "beneficiary_name", None),
+        "beneficiary_age": getattr(campaign, "beneficiary_age", None),
+        "beneficiary_medical_condition": getattr(campaign, "beneficiary_medical_condition", None),
         "medical_urgency": campaign.medical_urgency,
         "time_sensitivity": campaign.time_sensitivity,
         "target_amount": campaign.target_amount,
@@ -66,11 +72,43 @@ def list_pending_campaigns(db: Session = Depends(get_db), admin = Depends(requir
 def list_campaigns(db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
     return [_campaign_payload(c) for c in db.query(Campaign).order_by(Campaign.created_at.desc()).all()]
 
+
+@router.get("/campaigns/{campaign_id}")
+def get_campaign(campaign_id: int, db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    documents = (
+        db.query(Document)
+        .filter(Document.campaign_id == campaign.id)
+        .order_by(Document.uploaded_at.desc())
+        .all()
+    )
+
+    payload = _campaign_payload(campaign)
+    payload["documents"] = [
+        {
+            "id": document.id,
+            "filename": document.filename,
+            "file_url": document.file_url,
+            "document_type": getattr(document, "document_type", None),
+            "uploaded_at": document.uploaded_at,
+            "campaign_id": document.campaign_id,
+        }
+        for document in documents
+    ]
+    payload["documents_count"] = len(documents)
+    return payload
+
 @router.post("/campaigns/{campaign_id}/verify")
 def verify_campaign(campaign_id: int, db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
     campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
+    document_count = db.query(Document).filter(Document.campaign_id == campaign.id).count()
+    if document_count == 0:
+        raise HTTPException(status_code=400, detail="Upload supporting documents before approving the campaign")
     campaign.status = "approved"
     db.commit()
     return {"message": "Campaign approved", "campaign_id": campaign.id}
@@ -135,3 +173,31 @@ def resolve_fraud_report(report_id: int, db: Session = Depends(get_db), admin = 
     report.status = "resolved"
     db.commit()
     return {"message": "Fraud report resolved", "report_id": report.id}
+
+
+@router.put("/campaigns/{campaign_id}")
+def update_campaign(campaign_id: int, payload: dict, db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    allowed = {"title", "description", "medical_urgency", "time_sensitivity", "target_amount", "raised_amount", "status", "priority_score"}
+    for key, val in payload.items():
+        if key in allowed:
+            setattr(campaign, key, val)
+    db.commit()
+    db.refresh(campaign)
+    return _campaign_payload(campaign)
+
+
+@router.delete("/campaigns/{campaign_id}")
+def delete_campaign(campaign_id: int, db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    # remove dependent records first
+    db.query(Donation).filter(Donation.campaign_id == campaign_id).delete()
+    db.query(Document).filter(Document.campaign_id == campaign_id).delete()
+    db.query(FraudReport).filter(FraudReport.campaign_id == campaign_id).delete()
+    db.delete(campaign)
+    db.commit()
+    return {"message": "Campaign deleted", "campaign_id": campaign_id}

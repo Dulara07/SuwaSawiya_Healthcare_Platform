@@ -10,6 +10,7 @@ import { CampaignDetailPage } from './pages/CampaignDetailPage';
 import { PartnerRegisterPage } from './pages/PartnerRegisterPage';
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminCampaignEditPage } from './pages/AdminCampaignEditPage';
 import { LoginPage } from './pages/LoginPage';
 // Protected Route Wrapper
 function ProtectedRoute({ children, role }) {
@@ -47,6 +48,10 @@ export function App() {
 
               <Route path="/admin/dashboard" element={<ProtectedRoute role="admin">
                     <AdminDashboardPage />
+                  </ProtectedRoute>} />
+
+              <Route path="/admin/campaigns/:id/manage" element={<ProtectedRoute role="admin">
+                    <AdminCampaignEditPage />
                   </ProtectedRoute>} />
 
               {/* Fallback */}

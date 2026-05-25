@@ -8,6 +8,10 @@ class Campaign(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
+    category = Column(String, nullable=True)
+    beneficiary_name = Column(String, nullable=True)
+    beneficiary_age = Column(Integer, nullable=True)
+    beneficiary_medical_condition = Column(Text, nullable=True)
     medical_urgency = Column(Integer, nullable=False)  # 1-5 scale
     time_sensitivity = Column(Integer, nullable=False)  # 1-5 scale
     target_amount = Column(Float, nullable=False)

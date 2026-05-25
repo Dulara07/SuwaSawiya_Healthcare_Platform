@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import {
@@ -14,6 +15,7 @@ import {
   fetchFraudReports,
   reviewFraudReport,
   resolveFraudReport,
+  adminDeleteCampaign,
 } from '../api';
 import { ShieldCheck, Users, Megaphone, FlagTriangleRight, RefreshCw, CheckCircle2, XCircle, Eye } from 'lucide-react';
 
@@ -27,6 +29,7 @@ function statusVariant(status) {
 
 export function AdminDashboardPage() {
   const [summary, setSummary] = useState(null);
+  const navigate = useNavigate();
   const [pendingCampaigns, setPendingCampaigns] = useState([]);
   const [allCampaigns, setAllCampaigns] = useState([]);
   const [pendingPatients, setPendingPatients] = useState([]);
@@ -145,6 +148,9 @@ export function AdminDashboardPage() {
                             <Button size="sm" variant="outline" onClick={() => handleCampaignAction(campaign.id, 'reject')} className="inline-flex items-center gap-1">
                               <XCircle className="w-4 h-4" /> Reject
                             </Button>
+                            <Button size="sm" onClick={() => navigate(`/admin/campaigns/${campaign.id}/manage`)} className="inline-flex items-center gap-1">
+                              Manage
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -234,6 +240,7 @@ export function AdminDashboardPage() {
                       <th className="px-4 py-3">Raised</th>
                       <th className="px-4 py-3">Target</th>
                       <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -243,9 +250,23 @@ export function AdminDashboardPage() {
                         <td className="px-4 py-3 text-slate-600">{campaign.currency} {Number(campaign.raisedAmount || campaign.raised_amount || 0).toLocaleString()}</td>
                         <td className="px-4 py-3 text-slate-600">{campaign.currency} {Number(campaign.goalAmount || campaign.target_amount || 0).toLocaleString()}</td>
                         <td className="px-4 py-3"><Badge variant={statusVariant(campaign.status)}>{campaign.status}</Badge></td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" onClick={() => navigate(`/admin/campaigns/${campaign.id}/manage`)}>Manage</Button>
+                            <Button size="sm" variant="destructive" onClick={async () => {
+                              if (!confirm(`Delete campaign ${campaign.title}?`)) return;
+                              try {
+                                await adminDeleteCampaign(campaign.id);
+                                await refresh();
+                              } catch (e) {
+                                setError('Failed to delete campaign');
+                              }
+                            }}>Delete</Button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
-                    {allCampaigns.length === 0 && <tr><td className="px-4 py-6 text-slate-500" colSpan={4}>No campaigns available.</td></tr>}
+                    {allCampaigns.length === 0 && <tr><td className="px-4 py-6 text-slate-500" colSpan={5}>No campaigns available.</td></tr>}
                   </tbody>
                 </table>
               </div>

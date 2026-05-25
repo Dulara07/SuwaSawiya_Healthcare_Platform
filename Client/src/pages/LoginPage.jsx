@@ -23,7 +23,6 @@ export function LoginPage() {
     try {
       const token = await login(username, password);
       setUserSession(token);
-      setLoading(false);
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.role === 'admin') {
         navigate('/admin/dashboard');
@@ -33,7 +32,8 @@ export function LoginPage() {
         navigate('/');
       }
     } catch (err) {
-      setError('Invalid username or password');
+      console.error('Login error:', err);
+      setError(err.message || 'Invalid username or password');
       setLoading(false);
     }
   };
@@ -43,17 +43,50 @@ export function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      await register({
-        username,
-        password,
-        email,
-        full_name: fullName, // backend expects full_name, not fullName
+      // Validate inputs
+      if (!username.trim()) throw new Error('Username is required');
+      if (username.trim().length < 3) throw new Error('Username must be at least 3 characters');
+      if (!password.trim()) throw new Error('Password is required');
+      if (password.trim().length < 6) throw new Error('Password must be at least 6 characters');
+      if (!email.trim()) throw new Error('Email is required');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) throw new Error('Please enter a valid email');
+      if (!fullName.trim()) throw new Error('Full name is required');
+      
+      const registrationData = {
+        username: username.trim().substring(0, 50),
+        password: password.trim().substring(0, 72),
+        email: email.trim(),
+        full_name: fullName.trim(),
         role
-      });
-      setRegisterMode(false);
-      setLoading(false);
+      };
+      
+      console.log('Registering with:', registrationData);
+      
+      const response = await register(registrationData);
+      console.log('Registration successful:', response);
+      
+      // Auto-login after registration
+      try {
+        const token = await login(username, password);
+        setUserSession(token);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (payload.role === 'partner') {
+          navigate('/partner/dashboard');
+        } else {
+          navigate('/');
+        }
+      } catch (loginErr) {
+        // Registration successful but auto-login failed, go to login page
+        setRegisterMode(false);
+        setError(null);
+      }
     } catch (err) {
-      setError('Registration failed');
+      console.error('Registration error:', err);
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
@@ -103,7 +136,7 @@ export function LoginPage() {
           className="w-full border px-3 py-2 rounded"
           required
         />
-        {error && <div className="text-red-500 text-sm">{error}</div>}
+        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">{error}</div>}
         <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded font-bold" disabled={loading}>
           {loading ? (registerMode ? 'Registering...' : 'Logging in...') : (registerMode ? 'Register' : 'Login')}
         </button>

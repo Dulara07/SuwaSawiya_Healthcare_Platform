@@ -5,10 +5,18 @@ from fastapi.exceptions import HTTPException
 from app.utils.logging import logger
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    logger.warning(f"Validation error: {exc.errors()}")
+    errors = []
+    for error in exc.errors():
+        field = ".".join(str(x) for x in error["loc"][1:])  # Skip 'body'
+        errors.append({
+            "field": field,
+            "message": error["msg"],
+            "type": error["type"]
+        })
+    logger.warning(f"Validation error: {errors}")
     return JSONResponse(
         status_code=422,
-        content={"detail": exc.errors()}
+        content={"detail": errors}
     )
 
 async def http_exception_handler(request: Request, exc: HTTPException):

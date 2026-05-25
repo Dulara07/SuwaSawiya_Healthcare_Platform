@@ -19,11 +19,14 @@ export function UrgencyBadge({ level }) {
   return <Badge variant={map[level]}>{level} Urgency</Badge>;
 }
 export function StatusBadge({ status }) {
+  const normalized = String(status || '').toLowerCase();
   const map = {
-    Pending: 'warning',
-    Active: 'success',
-    Funded: 'default',
-    Rejected: 'danger'
+    pending: 'warning',
+    approved: 'success',
+    active: 'success',
+    funded: 'default',
+    completed: 'default',
+    rejected: 'danger'
   };
-  return <Badge variant={map[status]}>{status}</Badge>;
+  return <Badge variant={map[normalized] || 'neutral'}>{status}</Badge>;
 }
