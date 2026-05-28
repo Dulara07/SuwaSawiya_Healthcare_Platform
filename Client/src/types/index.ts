@@ -25,6 +25,10 @@ export interface Campaign {
   status: CampaignStatus;
   urgency: UrgencyLevel;
   priorityScore: number; // 1-10 for ML sorting
+  score?: number;
+  reasonTags?: string[];
+  source?: string;
+  fallbackUsed?: boolean;
   partnerId: string;
   partnerName: string;
   verified: boolean;

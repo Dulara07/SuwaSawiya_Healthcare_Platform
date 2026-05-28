@@ -3,7 +3,7 @@ import os
 from sqlalchemy import inspect, text
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app.utils.db import engine
-from app.models import base, campaign, document, donation, fraud_report, user
+from app.models import base, campaign, document, donation, fraud_report, user, interaction, recommendation_impression, consent_audit
 
 def create_all_tables():
     base.Base.metadata.create_all(bind=engine)

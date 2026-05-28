@@ -7,6 +7,7 @@ from app.models.fraud_report import FraudReport
 from app.models.donation import Donation
 from app.models.document import Document
 from app.auth.dependencies import require_role
+from app.utils.audit import log_action
 from app.utils.db import get_db
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -111,6 +112,10 @@ def verify_campaign(campaign_id: int, db: Session = Depends(get_db), admin = Dep
         raise HTTPException(status_code=400, detail="Upload supporting documents before approving the campaign")
     campaign.status = "approved"
     db.commit()
+    try:
+        log_action(admin.id, "approve_campaign", "campaign", campaign.id, details="approved via admin API")
+    except Exception:
+        pass
     return {"message": "Campaign approved", "campaign_id": campaign.id}
 
 @router.post("/campaigns/{campaign_id}/reject")
@@ -120,6 +125,10 @@ def reject_campaign(campaign_id: int, db: Session = Depends(get_db), admin = Dep
         raise HTTPException(status_code=404, detail="Campaign not found")
     campaign.status = "rejected"
     db.commit()
+    try:
+        log_action(admin.id, "reject_campaign", "campaign", campaign.id, details="rejected via admin API")
+    except Exception:
+        pass
     return {"message": "Campaign rejected", "campaign_id": campaign.id}
 
 @router.get("/patients/pending", response_model=List[dict])
@@ -140,6 +149,10 @@ def approve_patient_registration(user_id: int, db: Session = Depends(get_db), ad
     user.registration_status = "approved"
     user.is_active = True
     db.commit()
+    try:
+        log_action(admin.id, "approve_patient", "user", user.id, details="approved patient registration")
+    except Exception:
+        pass
     return {"message": "Patient registration approved", "user_id": user.id}
 
 @router.post("/patients/{user_id}/reject")
@@ -150,6 +163,10 @@ def reject_patient_registration(user_id: int, db: Session = Depends(get_db), adm
     user.registration_status = "rejected"
     user.is_active = False
     db.commit()
+    try:
+        log_action(admin.id, "reject_patient", "user", user.id, details="rejected patient registration")
+    except Exception:
+        pass
     return {"message": "Patient registration rejected", "user_id": user.id}
 
 @router.get("/fraud-reports", response_model=List[dict])
@@ -186,6 +203,10 @@ def update_campaign(campaign_id: int, payload: dict, db: Session = Depends(get_d
             setattr(campaign, key, val)
     db.commit()
     db.refresh(campaign)
+    try:
+        log_action(admin.id, "update_campaign", "campaign", campaign.id, details=str(payload))
+    except Exception:
+        pass
     return _campaign_payload(campaign)
 
 
@@ -200,4 +221,8 @@ def delete_campaign(campaign_id: int, db: Session = Depends(get_db), admin = Dep
     db.query(FraudReport).filter(FraudReport.campaign_id == campaign_id).delete()
     db.delete(campaign)
     db.commit()
+    try:
+        log_action(admin.id, "delete_campaign", "campaign", campaign_id, details="deleted via admin API")
+    except Exception:
+        pass
     return {"message": "Campaign deleted", "campaign_id": campaign_id}

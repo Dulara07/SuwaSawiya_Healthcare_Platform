@@ -24,7 +24,7 @@ class CampaignRead(CampaignBase):
     created_at: datetime
     updated_at: datetime
     owner_id: int
-    documents: Optional[List['DocumentRead']]
+    documents: Optional[List['DocumentRead']] = None
 
     model_config = ConfigDict(from_attributes=True)
 

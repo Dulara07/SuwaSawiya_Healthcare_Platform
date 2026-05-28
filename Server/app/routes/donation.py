@@ -5,7 +5,25 @@ from app.schemas.donation import DonationCreate, DonationRead
 from app.models.donation import Donation
 from app.models.campaign import Campaign
 from app.auth.dependencies import get_current_user
-from app.utils.db import get_db
+from app.utils.db import get_db, SessionLocal
+import threading
+import traceback
+
+
+def _trigger_retrain_async():
+    def _job():
+        db = SessionLocal()
+        try:
+            from app.services.recommendations import RecommendationEngine
+            engine = RecommendationEngine()
+            engine.train_from_db(db)
+        except Exception:
+            traceback.print_exc()
+        finally:
+            db.close()
+
+    thread = threading.Thread(target=_job, daemon=True)
+    thread.start()
 
 router = APIRouter(prefix="/donations", tags=["donations"])
 
@@ -28,6 +46,11 @@ def make_donation(donation_in: DonationCreate, db: Session = Depends(get_db), cu
     db.refresh(donation)
     db.refresh(campaign)
     db.refresh(current_user)
+    # trigger background retrain (non-blocking)
+    try:
+        _trigger_retrain_async()
+    except Exception:
+        pass
     return donation
 
 @router.get("/", response_model=List[DonationRead])

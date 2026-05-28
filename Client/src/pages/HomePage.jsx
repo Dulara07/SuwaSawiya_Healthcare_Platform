@@ -7,6 +7,7 @@ import { SkeletonCard } from '../components/Skeleton';
 import { MOCK_CAMPAIGNS } from '../data/mockData';
 import { fetchCampaigns } from '../api';
 import { useLanguage } from '../contexts/LanguageContext';
+import { fetchFeed } from '../api';
 export function HomePage() {
   const { t } = useLanguage();
   const [campaigns, setCampaigns] = useState([]);
@@ -15,13 +16,15 @@ export function HomePage() {
 
   useEffect(() => {
     setLoading(true);
-    fetchCampaigns()
+    fetchFeed()
       .then(data => {
         setCampaigns(data);
         setLoading(false);
+        setError(null);
       })
       .catch(err => {
         setCampaigns(MOCK_CAMPAIGNS);
+        setError(err.message || 'Unable to load feed');
         setLoading(false);
       });
   }, []);

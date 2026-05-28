@@ -123,6 +123,10 @@ function normalizeCampaign(campaign) {
     createdAt: campaign.createdAt || campaign.created_at,
     updatedAt: campaign.updatedAt || campaign.updated_at,
     priorityScore: campaign.priorityScore ?? campaign.priority_score ?? 0,
+    score: campaign.score ?? campaign.priorityScore ?? campaign.priority_score ?? 0,
+    reasonTags: campaign.reasonTags ?? campaign.reason_tags ?? [],
+    source: campaign.source || 'campaigns',
+    fallbackUsed: campaign.fallbackUsed ?? campaign.fallback_used ?? false,
     status: campaign.status || 'Active',
     beneficiary_name: campaign.beneficiary_name || campaign.patientName || campaign.title,
     beneficiary_age: campaign.beneficiary_age ?? null,
@@ -134,6 +138,21 @@ function normalizeCampaign(campaign) {
     target_amount: targetAmount,
     updates: Array.isArray(campaign.updates) ? campaign.updates : [],
   };
+}
+
+export async function fetchRecommendations(userId, k = 10) {
+  const params = new URLSearchParams();
+  if (userId !== undefined && userId !== null) params.set('user_id', String(userId));
+  params.set('k', String(k));
+  const response = await fetch(`${API_BASE_URL}/recommendations?${params.toString()}`);
+  if (!response.ok) throw new Error('Failed to fetch recommendations');
+  return normalizeCampaignList(await response.json());
+}
+
+export async function fetchFeed(k = 20) {
+  const response = await fetch(`${API_BASE_URL}/feed?k=${k}`);
+  if (!response.ok) throw new Error('Failed to fetch feed');
+  return normalizeCampaignList(await response.json());
 }
 
 function normalizeCampaignList(payload) {

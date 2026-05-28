@@ -1,14 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { UrgencyBadge } from './ui/Badge';
 import { ProgressBar } from './ProgressBar';
 import { ShieldCheck, Clock } from 'lucide-react';
+import { Badge, UrgencyBadge } from './ui/Badge';
 export function CampaignCard({ campaign }) {
   const raisedAmount = campaign.raisedAmount ?? campaign.raised_amount ?? 0;
   const goalAmount = campaign.goalAmount ?? campaign.target_amount ?? 0;
   const currency = campaign.currency || 'LKR';
   const percent = goalAmount > 0 ? Math.round(raisedAmount / goalAmount * 100) : 0;
   const deadlineLabel = campaign.deadline ? new Date(campaign.deadline).toLocaleDateString() : 'No deadline set';
+  const reasonTags = Array.isArray(campaign.reasonTags) ? campaign.reasonTags : [];
+  const reasonVariant = tag => {
+    const normalized = String(tag || '').toLowerCase();
+    if (normalized === 'urgent') return 'danger';
+    if (normalized === 'verified') return 'success';
+    if (normalized === 'nearly_funded') return 'warning';
+    if (normalized === 'recent') return 'neutral';
+    return 'default';
+  };
+  const reasonLabel = tag => String(tag || '').replace(/_/g, ' ');
   return <Link to={`/campaigns/${campaign.id}`} className="group flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 h-full">
       {/* Image Container */}
       <div className="relative h-48 w-full overflow-hidden bg-gray-100">
@@ -16,6 +26,11 @@ export function CampaignCard({ campaign }) {
         <div className="absolute top-3 left-3">
           <UrgencyBadge level={campaign.urgency} />
         </div>
+        {reasonTags.length > 0 && <div className="absolute top-3 right-3 flex max-w-[70%] flex-wrap justify-end gap-2">
+            {reasonTags.slice(0, 2).map(tag => <Badge key={tag} variant={reasonVariant(tag)}>
+                {reasonLabel(tag)}
+              </Badge>)}
+          </div>}
         {campaign.verified && <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center text-xs font-medium text-blue-700 shadow-sm">
             <ShieldCheck className="w-3 h-3 mr-1" />
             Verified
