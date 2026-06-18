@@ -24,3 +24,4 @@ class Campaign(Base):
     owner = relationship("User", back_populates="campaigns")
     documents = relationship("Document", back_populates="campaign")
     donations = relationship("Donation", back_populates="campaign")
+    updates = relationship("CampaignUpdate", back_populates="campaign", cascade="all, delete-orphan")

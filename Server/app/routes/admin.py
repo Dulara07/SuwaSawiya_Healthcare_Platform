@@ -6,9 +6,11 @@ from app.models.user import User
 from app.models.fraud_report import FraudReport
 from app.models.donation import Donation
 from app.models.document import Document
+from app.models.disbursement import Disbursement
 from app.auth.dependencies import require_role
 from app.utils.audit import log_action
 from app.utils.db import get_db
+import datetime
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -52,6 +54,22 @@ def _fraud_payload(report: FraudReport):
         "reason": report.reason,
         "status": report.status,
         "reported_at": report.reported_at,
+    }
+
+
+def _disbursement_payload(disbursement: Disbursement):
+    return {
+        "id": disbursement.id,
+        "campaign_id": disbursement.campaign_id,
+        "requested_by_id": disbursement.requested_by_id,
+        "approved_by_id": disbursement.approved_by_id,
+        "amount": disbursement.amount,
+        "bank_account_number": disbursement.bank_account_number,
+        "bank_name": disbursement.bank_name,
+        "status": disbursement.status,
+        "approval_notes": disbursement.approval_notes,
+        "requested_at": disbursement.requested_at,
+        "approved_at": disbursement.approved_at,
     }
 
 @router.get("/dashboard")
@@ -190,6 +208,27 @@ def resolve_fraud_report(report_id: int, db: Session = Depends(get_db), admin = 
     report.status = "resolved"
     db.commit()
     return {"message": "Fraud report resolved", "report_id": report.id}
+
+
+@router.get("/disbursements", response_model=List[dict])
+def list_disbursements(db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
+    return [_disbursement_payload(item) for item in db.query(Disbursement).order_by(Disbursement.requested_at.desc()).all()]
+
+
+@router.post("/disbursements/{disbursement_id}/approve")
+def approve_disbursement(disbursement_id: int, db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
+    disbursement = db.query(Disbursement).filter(Disbursement.id == disbursement_id).first()
+    if not disbursement:
+        raise HTTPException(status_code=404, detail="Disbursement not found")
+    disbursement.status = "approved"
+    disbursement.approved_by_id = admin.id
+    disbursement.approved_at = datetime.datetime.utcnow()
+    db.commit()
+    try:
+        log_action(admin.id, "approve_disbursement", "disbursement", disbursement.id, details="approved via admin API")
+    except Exception:
+        pass
+    return {"message": "Disbursement approved", "disbursement_id": disbursement.id}
 
 
 @router.put("/campaigns/{campaign_id}")

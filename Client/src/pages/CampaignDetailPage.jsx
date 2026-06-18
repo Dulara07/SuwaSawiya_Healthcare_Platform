@@ -5,11 +5,12 @@ import { ProgressBar } from '../components/ProgressBar';
 import { UrgencyBadge } from '../components/ui/Badge';
 import { DonationModal } from '../components/DonationModal';
 import { ShieldCheck, Calendar, User, Share2, AlertCircle } from 'lucide-react';
-import { fetchCampaigns } from '../api';
+import { fetchCampaignById, fetchCampaignUpdates } from '../api';
 export function CampaignDetailPage() {
   const { id } = useParams();
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
   const [campaign, setCampaign] = useState(null);
+  const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,9 +19,12 @@ export function CampaignDetailPage() {
     setError(null);
 
     try {
-      const campaigns = await fetchCampaigns();
-      const match = campaigns.find(item => String(item.id) === String(id));
+      const [match, campaignUpdates] = await Promise.all([
+        fetchCampaignById(id),
+        fetchCampaignUpdates(id),
+      ]);
       setCampaign(match || null);
+      setUpdates(Array.isArray(campaignUpdates) ? campaignUpdates : []);
     } catch (err) {
       setError('Failed to load campaign details.');
     } finally {
@@ -131,10 +135,10 @@ export function CampaignDetailPage() {
             {/* Updates Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
               <h3 className="text-xl font-bold text-gray-900 mb-6">Updates</h3>
-              {campaign.updates?.length > 0 ? <div className="space-y-6">
-                  {campaign.updates.map(update => <div key={update.id} className="border-l-2 border-blue-200 pl-4 pb-2">
+              {updates.length > 0 ? <div className="space-y-6">
+                  {updates.map(update => <div key={update.id} className="border-l-2 border-blue-200 pl-4 pb-2">
                       <p className="text-xs text-gray-500 mb-1">
-                        {new Date(update.date).toLocaleDateString()}
+                        {new Date(update.created_at).toLocaleDateString()}
                       </p>
                       <h4 className="font-medium text-gray-900 mb-2">
                         {update.title}

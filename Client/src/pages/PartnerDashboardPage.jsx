@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBadge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { DollarSign, Users, FileText, Target, AlertCircle, RefreshCcw, UserPlus } from 'lucide-react';
-import { createPartnerBeneficiary, fetchPartnerDashboard } from '../api';
+import { DollarSign, Users, FileText, Target, AlertCircle, RefreshCcw, UserPlus, MessageSquare, Banknote } from 'lucide-react';
+import { createPartnerBeneficiary, createCampaignUpdate, fetchPartnerDashboard, requestDisbursement } from '../api';
 
 export function PartnerDashboardPage() {
   const requiredDocuments = [
@@ -34,6 +34,11 @@ export function PartnerDashboardPage() {
   });
   const [beneficiarySubmitting, setBeneficiarySubmitting] = useState(false);
   const [beneficiaryError, setBeneficiaryError] = useState(null);
+  const [updateForm, setUpdateForm] = useState({ campaign_id: '', title: '', content: '' });
+  const [disbursementForm, setDisbursementForm] = useState({ campaign_id: '', amount: '', bank_account_number: '', bank_name: '' });
+  const [updateSubmitting, setUpdateSubmitting] = useState(false);
+  const [disbursementSubmitting, setDisbursementSubmitting] = useState(false);
+  const [workflowError, setWorkflowError] = useState(null);
 
   const loadDashboard = async () => {
     setLoading(true);
@@ -108,6 +113,45 @@ export function PartnerDashboardPage() {
     }
   };
 
+  const submitCampaignUpdate = async e => {
+    e.preventDefault();
+    setUpdateSubmitting(true);
+    setWorkflowError(null);
+    try {
+      await createCampaignUpdate({
+        campaignId: updateForm.campaign_id,
+        title: updateForm.title,
+        content: updateForm.content,
+      });
+      setUpdateForm({ campaign_id: '', title: '', content: '' });
+      setSuccessMessage('Campaign update posted successfully.');
+    } catch (err) {
+      setWorkflowError(err.message || 'Failed to post campaign update');
+    } finally {
+      setUpdateSubmitting(false);
+    }
+  };
+
+  const submitDisbursementRequest = async e => {
+    e.preventDefault();
+    setDisbursementSubmitting(true);
+    setWorkflowError(null);
+    try {
+      await requestDisbursement({
+        campaignId: disbursementForm.campaign_id,
+        amount: disbursementForm.amount,
+        bank_account_number: disbursementForm.bank_account_number,
+        bank_name: disbursementForm.bank_name,
+      });
+      setDisbursementForm({ campaign_id: '', amount: '', bank_account_number: '', bank_name: '' });
+      setSuccessMessage('Disbursement request submitted for admin review.');
+    } catch (err) {
+      setWorkflowError(err.message || 'Failed to request disbursement');
+    } finally {
+      setDisbursementSubmitting(false);
+    }
+  };
+
   const totalRaised = summary.total_raised ?? campaigns.reduce((acc, curr) => acc + Number(curr.raised_amount ?? curr.raisedAmount ?? 0), 0);
   const totalTarget = summary.total_target ?? campaigns.reduce((acc, curr) => acc + Number(curr.target_amount ?? curr.goalAmount ?? 0), 0);
   const pendingReview = summary.pending_review ?? campaigns.filter(campaign => String(campaign.status || '').toLowerCase() === 'pending').length;
@@ -128,6 +172,7 @@ export function PartnerDashboardPage() {
         </div>
 
         {error && <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 flex items-center gap-2"><AlertCircle className="w-4 h-4" />{error}</div>}
+        {workflowError && <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 flex items-center gap-2"><AlertCircle className="w-4 h-4" />{workflowError}</div>}
         {successMessage && <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700 flex items-center gap-2"><RefreshCcw className="w-4 h-4" />{successMessage}</div>}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -243,6 +288,64 @@ export function PartnerDashboardPage() {
               <UserPlus className="w-4 h-4" /> Register Beneficiary
             </Button>
           </form>
+        </section>
+
+        <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="rounded-lg border border-gray-200 p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-amber-100 rounded-lg text-amber-600"><MessageSquare className="w-5 h-5" /></div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Post Campaign Update</h3>
+                  <p className="text-sm text-gray-500">Share a progress note with donors.</p>
+                </div>
+              </div>
+              <form onSubmit={submitCampaignUpdate} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Campaign ID</label>
+                  <input value={updateForm.campaign_id} onChange={e => setUpdateForm(prev => ({ ...prev, campaign_id: e.target.value }))} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="1" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Update Title</label>
+                  <input value={updateForm.title} onChange={e => setUpdateForm(prev => ({ ...prev, title: e.target.value }))} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="Surgery scheduled" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Update Content</label>
+                  <textarea value={updateForm.content} onChange={e => setUpdateForm(prev => ({ ...prev, content: e.target.value }))} rows={4} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="Add progress details, milestones, or thank-you notes" />
+                </div>
+                <Button type="submit" isLoading={updateSubmitting} disabled={updateSubmitting} className="w-full">Post Update</Button>
+              </form>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-green-100 rounded-lg text-green-600"><Banknote className="w-5 h-5" /></div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Request Disbursement</h3>
+                  <p className="text-sm text-gray-500">Send a bank transfer request for admin approval.</p>
+                </div>
+              </div>
+              <form onSubmit={submitDisbursementRequest} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Campaign ID</label>
+                  <input value={disbursementForm.campaign_id} onChange={e => setDisbursementForm(prev => ({ ...prev, campaign_id: e.target.value }))} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="1" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount (LKR)</label>
+                  <input type="number" value={disbursementForm.amount} onChange={e => setDisbursementForm(prev => ({ ...prev, amount: e.target.value }))} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="250000" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bank Account Number</label>
+                  <input value={disbursementForm.bank_account_number} onChange={e => setDisbursementForm(prev => ({ ...prev, bank_account_number: e.target.value }))} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="1234567890" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+                  <input value={disbursementForm.bank_name} onChange={e => setDisbursementForm(prev => ({ ...prev, bank_name: e.target.value }))} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="Bank of Ceylon" />
+                </div>
+                <Button type="submit" isLoading={disbursementSubmitting} disabled={disbursementSubmitting} className="w-full">Request Disbursement</Button>
+              </form>
+            </div>
+          </div>
         </section>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

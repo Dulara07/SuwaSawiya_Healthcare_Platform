@@ -3,13 +3,18 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.schemas.campaign import CampaignCreate, CampaignRead
 from app.schemas.document import DocumentRead
+from app.schemas.campaign_update import CampaignUpdateCreate, CampaignUpdateRead
+from app.schemas.disbursement import DisbursementCreate, DisbursementRead
 from app.models.campaign import Campaign
 from app.models.document import Document
+from app.models.campaign_update import CampaignUpdate
+from app.models.disbursement import Disbursement
 from app.auth.dependencies import get_current_user, require_role
 from app.utils.db import get_db
 from app.config import settings
 import os
 from uuid import uuid4
+import datetime
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -160,6 +165,94 @@ def list_campaigns_by_priority(db: Session = Depends(get_db)):
     db.commit()
     sorted_campaigns = sorted(campaigns, key=lambda c: c.priority_score, reverse=True)
     return sorted_campaigns
+
+
+@router.get("/{campaign_id}", response_model=CampaignRead)
+def get_campaign_details(campaign_id: int, db: Session = Depends(get_db)):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if campaign is None:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    return campaign
+
+
+@router.get("/{campaign_id}/updates", response_model=List[CampaignUpdateRead])
+def list_campaign_updates(campaign_id: int, db: Session = Depends(get_db)):
+    return (
+        db.query(CampaignUpdate)
+        .filter(CampaignUpdate.campaign_id == campaign_id)
+        .order_by(CampaignUpdate.created_at.desc())
+        .all()
+    )
+
+
+@router.post("/partner/campaigns/{campaign_id}/updates", response_model=CampaignUpdateRead)
+def create_campaign_update(
+    campaign_id: int,
+    payload: CampaignUpdateCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_role("partner")),
+):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id, Campaign.owner_id == current_user.id).first()
+    if campaign is None:
+        raise HTTPException(status_code=404, detail="Campaign not found or unauthorized")
+
+    update = CampaignUpdate(
+        campaign_id=campaign.id,
+        author_id=current_user.id,
+        title=payload.title,
+        content=payload.content,
+    )
+    db.add(update)
+    db.commit()
+    db.refresh(update)
+    return update
+
+
+@router.get("/partner/campaigns/{campaign_id}/updates", response_model=List[CampaignUpdateRead])
+def list_partner_campaign_updates(
+    campaign_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_role("partner")),
+):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id, Campaign.owner_id == current_user.id).first()
+    if campaign is None:
+        raise HTTPException(status_code=404, detail="Campaign not found or unauthorized")
+    return (
+        db.query(CampaignUpdate)
+        .filter(CampaignUpdate.campaign_id == campaign.id)
+        .order_by(CampaignUpdate.created_at.desc())
+        .all()
+    )
+
+
+@router.post("/partner/campaigns/{campaign_id}/request-disbursement", response_model=DisbursementRead)
+def request_disbursement(
+    campaign_id: int,
+    payload: DisbursementCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_role("partner")),
+):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id, Campaign.owner_id == current_user.id).first()
+    if campaign is None:
+        raise HTTPException(status_code=404, detail="Campaign not found or unauthorized")
+
+    amount = float(payload.amount)
+    if amount <= 0 or amount > float(campaign.raised_amount or 0):
+        raise HTTPException(status_code=400, detail="Invalid disbursement amount")
+
+    disbursement = Disbursement(
+        campaign_id=campaign.id,
+        requested_by_id=current_user.id,
+        amount=amount,
+        bank_account_number=payload.bank_account_number,
+        bank_name=payload.bank_name,
+        status="pending",
+        requested_at=datetime.datetime.utcnow(),
+    )
+    db.add(disbursement)
+    db.commit()
+    db.refresh(disbursement)
+    return disbursement
 
 
 @router.get("/partner/dashboard")

@@ -167,6 +167,18 @@ export async function fetchCampaigns() {
   return normalizeCampaignList(data);
 }
 
+export async function fetchCampaignById(campaignId) {
+  const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`);
+  if (!response.ok) throw new Error('Failed to fetch campaign');
+  return normalizeCampaign(await response.json());
+}
+
+export async function fetchCampaignUpdates(campaignId) {
+  const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/updates`);
+  if (!response.ok) throw new Error('Failed to fetch campaign updates');
+  return response.json();
+}
+
 export async function fetchPartnerDashboard() {
   const response = await fetch(`${API_BASE_URL}/campaigns/partner/dashboard`, {
     headers: getAuthHeaders(),
@@ -213,6 +225,52 @@ export async function uploadPartnerCampaignDocument({ campaignId, documentFile, 
     body: formData,
   });
   if (!response.ok) throw new Error('Failed to upload document');
+  return response.json();
+}
+
+export async function createCampaignUpdate({ campaignId, title, content }) {
+  const response = await fetch(`${API_BASE_URL}/campaigns/partner/campaigns/${campaignId}/updates`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ title, content }),
+  });
+  if (!response.ok) throw new Error('Failed to create campaign update');
+  return response.json();
+}
+
+export async function requestDisbursement({ campaignId, amount, bank_account_number, bank_name }) {
+  const response = await fetch(`${API_BASE_URL}/campaigns/partner/campaigns/${campaignId}/request-disbursement`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ amount: Number(amount), bank_account_number, bank_name }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to request disbursement');
+  }
+  return response.json();
+}
+
+export async function fetchAdminDisbursements() {
+  const response = await fetch(`${API_BASE_URL}/admin/disbursements`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Failed to fetch disbursements');
+  return response.json();
+}
+
+export async function approveDisbursement(disbursementId) {
+  const response = await fetch(`${API_BASE_URL}/admin/disbursements/${disbursementId}/approve`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Failed to approve disbursement');
   return response.json();
 }
 

@@ -150,12 +150,12 @@ export function DonationModal({ campaign, isOpen, onClose, onDonationSuccess }) 
               </div>
               <div className="bg-green-50 p-3 rounded-lg flex items-start space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-green-800">Your donation will be processed securely via our partner payment gateway.</p>
+                <p className="text-xs text-green-800">Your donation will be recorded instantly and reflected in the campaign progress.</p>
               </div>
               <div className="flex gap-3 pt-4 border-t border-gray-100">
                 <Button size="lg" variant="outline" onClick={() => setStep(1)} fullWidth>Back</Button>
                 <Button size="lg" isLoading={isLoading} onClick={handleDonate} fullWidth className="inline-flex items-center justify-center gap-2">
-                  <Lock className="w-4 h-4" /> Pay {campaign.currency} {Number(amount).toLocaleString()}
+                  <Lock className="w-4 h-4" /> Donate {campaign.currency} {Number(amount).toLocaleString()}
                 </Button>
               </div>
               {errors.submit && <p className="text-red-500 text-xs text-center">{errors.submit}</p>}

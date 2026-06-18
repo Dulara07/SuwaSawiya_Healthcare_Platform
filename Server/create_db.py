@@ -3,7 +3,7 @@ import os
 from sqlalchemy import inspect, text
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app.utils.db import engine
-from app.models import base, campaign, document, donation, fraud_report, user, interaction, recommendation_impression, consent_audit
+from app.models import base, campaign, campaign_update, disbursement, document, donation, fraud_report, user, interaction, recommendation_impression, consent_audit
 
 def create_all_tables():
     base.Base.metadata.create_all(bind=engine)
@@ -11,6 +11,14 @@ def create_all_tables():
     user_columns = [column["name"] for column in inspector.get_columns("users")]
     campaign_columns = [column["name"] for column in inspector.get_columns("campaigns")]
     document_columns = [column["name"] for column in inspector.get_columns("documents")]
+    if "campaign_updates" in inspector.get_table_names():
+        update_columns = [column["name"] for column in inspector.get_columns("campaign_updates")]
+    else:
+        update_columns = []
+    if "disbursements" in inspector.get_table_names():
+        disbursement_columns = [column["name"] for column in inspector.get_columns("disbursements")]
+    else:
+        disbursement_columns = []
     with engine.begin() as connection:
         if "registration_status" not in user_columns:
             connection.execute(text("ALTER TABLE users ADD COLUMN registration_status VARCHAR DEFAULT 'approved'"))
@@ -31,6 +39,33 @@ def create_all_tables():
             connection.execute(text("ALTER TABLE campaigns ADD COLUMN beneficiary_medical_condition TEXT"))
         if "document_type" not in document_columns:
             connection.execute(text("ALTER TABLE documents ADD COLUMN document_type VARCHAR"))
+        if not update_columns:
+            connection.execute(text("""
+                CREATE TABLE IF NOT EXISTS campaign_updates (
+                    id SERIAL PRIMARY KEY,
+                    campaign_id INTEGER NOT NULL REFERENCES campaigns(id),
+                    author_id INTEGER REFERENCES users(id),
+                    title VARCHAR NOT NULL,
+                    content TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+        if not disbursement_columns:
+            connection.execute(text("""
+                CREATE TABLE IF NOT EXISTS disbursements (
+                    id SERIAL PRIMARY KEY,
+                    campaign_id INTEGER NOT NULL REFERENCES campaigns(id),
+                    requested_by_id INTEGER REFERENCES users(id),
+                    approved_by_id INTEGER REFERENCES users(id),
+                    amount FLOAT NOT NULL,
+                    bank_account_number VARCHAR,
+                    bank_name VARCHAR,
+                    status VARCHAR DEFAULT 'pending',
+                    approval_notes TEXT,
+                    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    approved_at TIMESTAMP
+                )
+            """))
     print("All tables created successfully.")
 
 if __name__ == "__main__":

@@ -16,6 +16,8 @@ import {
   reviewFraudReport,
   resolveFraudReport,
   adminDeleteCampaign,
+  fetchAdminDisbursements,
+  approveDisbursement,
 } from '../api';
 import { ShieldCheck, Users, Megaphone, FlagTriangleRight, RefreshCw, CheckCircle2, XCircle, Eye } from 'lucide-react';
 
@@ -35,6 +37,7 @@ export function AdminDashboardPage() {
   const [pendingPatients, setPendingPatients] = useState([]);
   const [allPatients, setAllPatients] = useState([]);
   const [fraudReports, setFraudReports] = useState([]);
+  const [disbursements, setDisbursements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -42,13 +45,14 @@ export function AdminDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [dashboard, campaignsPending, campaignsAll, patientsPending, patientsAll, reports] = await Promise.all([
+      const [dashboard, campaignsPending, campaignsAll, patientsPending, patientsAll, reports, disbursementRows] = await Promise.all([
         fetchAdminDashboard(),
         fetchPendingAdminCampaigns(),
         fetchAllAdminCampaigns(),
         fetchPendingPatients(),
         fetchAllPatients(),
         fetchFraudReports(),
+        fetchAdminDisbursements(),
       ]);
       setSummary(dashboard);
       setPendingCampaigns(campaignsPending);
@@ -56,6 +60,7 @@ export function AdminDashboardPage() {
       setPendingPatients(patientsPending);
       setAllPatients(patientsAll);
       setFraudReports(reports);
+      setDisbursements(disbursementRows);
     } catch (err) {
       setError('Failed to load admin dashboard');
     } finally {
@@ -118,7 +123,7 @@ export function AdminDashboardPage() {
           <SummaryCard icon={ShieldCheck} label="Pending Campaigns" value={summary?.campaigns_pending_review ?? pendingCampaigns.length} />
           <SummaryCard icon={Users} label="Pending Patients" value={summary?.patient_registrations_pending ?? pendingPatients.length} />
           <SummaryCard icon={FlagTriangleRight} label="Fraud Reports" value={summary?.fraud_reports_pending ?? fraudReports.filter(r => r.status === 'pending').length} />
-          <SummaryCard icon={Megaphone} label="All Campaigns" value={summary?.total_campaigns ?? allCampaigns.length} />
+          <SummaryCard icon={Megaphone} label="Disbursements" value={summary?.disbursements_pending ?? disbursements.filter(item => item.status === 'pending').length} />
         </div>
 
         {loading ? <div className="py-20 text-center text-slate-500">Loading admin data...</div> : (
@@ -226,6 +231,41 @@ export function AdminDashboardPage() {
                       </tr>
                     ))}
                     {fraudReports.length === 0 && <tr><td className="px-4 py-6 text-slate-500" colSpan={4}>No fraud reports yet.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Disbursement Requests" subtitle="Approve or reject partner fund transfer requests.">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-slate-500 bg-slate-50">
+                    <tr>
+                      <th className="px-4 py-3">Campaign ID</th>
+                      <th className="px-4 py-3">Bank</th>
+                      <th className="px-4 py-3">Amount</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {disbursements.map(item => (
+                      <tr key={item.id} className="hover:bg-slate-50/70">
+                        <td className="px-4 py-3 font-medium text-slate-900">#{item.campaign_id}</td>
+                        <td className="px-4 py-3 text-slate-600">{item.bank_name || '-'}<div className="text-xs text-slate-400">{item.bank_account_number || ''}</div></td>
+                        <td className="px-4 py-3 text-slate-600">LKR {Number(item.amount || 0).toLocaleString()}</td>
+                        <td className="px-4 py-3"><Badge variant={statusVariant(item.status)}>{item.status}</Badge></td>
+                        <td className="px-4 py-3">
+                          <Button size="sm" onClick={async () => {
+                            await approveDisbursement(item.id);
+                            await refresh();
+                          }} disabled={String(item.status).toLowerCase() !== 'pending'}>
+                            Approve
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                    {disbursements.length === 0 && <tr><td className="px-4 py-6 text-slate-500" colSpan={5}>No disbursement requests yet.</td></tr>}
                   </tbody>
                 </table>
               </div>

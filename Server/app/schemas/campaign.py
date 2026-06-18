@@ -25,8 +25,10 @@ class CampaignRead(CampaignBase):
     updated_at: datetime
     owner_id: int
     documents: Optional[List['DocumentRead']] = None
+    updates: Optional[List['CampaignUpdateRead']] = None
 
     model_config = ConfigDict(from_attributes=True)
 
 from app.schemas.document import DocumentRead
+from app.schemas.campaign_update import CampaignUpdateRead
 CampaignRead.update_forward_refs()
