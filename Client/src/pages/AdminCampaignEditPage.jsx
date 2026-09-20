@@ -90,22 +90,22 @@ export function AdminCampaignEditPage() {
   return (
     <div className="min-h-screen bg-slate-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Manage Campaign — {campaign.title}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h1 className="text-2xl font-bold break-words">Manage Campaign — {campaign.title}</h1>
           <div className="flex gap-2">
             <Button onClick={() => navigate('/admin/dashboard')}>Back</Button>
             <Button variant="destructive" onClick={remove}>Delete</Button>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border p-6">
+        <div className="bg-white rounded-2xl border p-4 sm:p-6">
           <label className="block mb-2">Title</label>
           <input className="w-full p-2 border rounded" value={form.title} onChange={e => handleChange('title', e.target.value)} />
 
           <label className="block mt-4 mb-2">Description</label>
           <textarea className="w-full p-2 border rounded" rows={6} value={form.description} onChange={e => handleChange('description', e.target.value)} />
 
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div>
               <label className="block mb-2">Medical Urgency (1-5)</label>
               <input type="number" min={1} max={5} className="w-full p-2 border rounded" value={form.medical_urgency} onChange={e => handleChange('medical_urgency', Number(e.target.value))} />
@@ -116,7 +116,7 @@ export function AdminCampaignEditPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div>
               <label className="block mb-2">Target Amount</label>
               <input type="number" className="w-full p-2 border rounded" value={form.target_amount} onChange={e => handleChange('target_amount', Number(e.target.value))} />
@@ -127,7 +127,7 @@ export function AdminCampaignEditPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div>
               <label className="block mb-2">Status</label>
               <select className="w-full p-2 border rounded" value={form.status} onChange={e => handleChange('status', e.target.value)}>
@@ -143,28 +143,28 @@ export function AdminCampaignEditPage() {
             </div>
           </div>
 
-          <div className="flex gap-2 justify-end mt-6">
-            <Button onClick={() => navigate('/admin/dashboard')} variant="outline">Cancel</Button>
-            <Button onClick={approve} variant="secondary" disabled={!campaign?.documents?.length} isLoading={approving}>
+          <div className="flex flex-col sm:flex-row gap-2 sm:justify-end mt-6">
+            <Button onClick={() => navigate('/admin/dashboard')} variant="outline" className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={approve} variant="secondary" disabled={!campaign?.documents?.length} isLoading={approving} className="w-full sm:w-auto">
               Approve Campaign
             </Button>
-            <Button onClick={save} isLoading={saving}>Save Changes</Button>
+            <Button onClick={save} isLoading={saving} className="w-full sm:w-auto">Save Changes</Button>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border p-6 mt-6">
+        <div className="bg-white rounded-2xl border p-4 sm:p-6 mt-6">
           <h2 className="text-lg font-bold text-slate-900 mb-4">Supporting Documents</h2>
           {campaign?.documents?.length ? (
             <div className="space-y-3">
               {campaign.documents.map(document => (
-                <div key={document.id} className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
-                  <div>
-                    <p className="font-medium text-slate-900">{document.filename}</p>
+                <div key={document.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-slate-200 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-900 break-words">{document.filename}</p>
                     <p className="text-sm text-slate-500">
                       {document.document_type || 'document'} · {new Date(document.uploaded_at).toLocaleString()}
                     </p>
                   </div>
-                  <a href={resolveDocumentUrl(document.file_url)} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                  <a href={resolveDocumentUrl(document.file_url)} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium flex-shrink-0">
                     View file
                   </a>
                 </div>

@@ -19,3 +19,4 @@ class User(Base):
     # Relationships
     campaigns = relationship("Campaign", back_populates="owner")
     donations = relationship("Donation", back_populates="donor")
+    documents = relationship("Document", back_populates="user")

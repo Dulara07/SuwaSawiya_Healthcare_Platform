@@ -94,11 +94,14 @@ export function AdminDashboardPage() {
     await refresh();
   };
 
-  const handleFraudAction = async (reportId, action) => {
+  const handleFraudAction = async (reportId, action, verdict) => {
     if (action === 'review') {
       await reviewFraudReport(reportId);
+    } else if (verdict === 'confirmed') {
+      if (!confirm('Confirm this report as fraud? The associated campaign will be rejected immediately.')) return;
+      await resolveFraudReport(reportId, 'confirmed');
     } else {
-      await resolveFraudReport(reportId);
+      await resolveFraudReport(reportId, 'dismissed');
     }
     await refresh();
   };
@@ -213,23 +216,34 @@ export function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {fraudReports.map(report => (
-                      <tr key={report.id} className="hover:bg-slate-50/70">
-                        <td className="px-4 py-3 font-medium text-slate-900">#{report.campaign_id}</td>
-                        <td className="px-4 py-3 text-slate-600 max-w-xl">{report.reason}</td>
-                        <td className="px-4 py-3"><Badge variant={statusVariant(report.status)}>{report.status}</Badge></td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-2">
-                            <Button size="sm" variant="outline" onClick={() => handleFraudAction(report.id, 'review')} className="inline-flex items-center gap-1">
-                              <Eye className="w-4 h-4" /> Review
-                            </Button>
-                            <Button size="sm" onClick={() => handleFraudAction(report.id, 'resolve')} className="inline-flex items-center gap-1">
-                              <CheckCircle2 className="w-4 h-4" /> Resolve
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {fraudReports.map(report => {
+                      const isResolved = String(report.status).toLowerCase() === 'resolved';
+                      return (
+                        <tr key={report.id} className="hover:bg-slate-50/70">
+                          <td className="px-4 py-3 font-medium text-slate-900">#{report.campaign_id}</td>
+                          <td className="px-4 py-3 text-slate-600 max-w-xl">{report.reason}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant={statusVariant(report.status)}>{report.status}</Badge>
+                            {isResolved && report.resolution && (
+                              <div className="text-xs text-slate-400 mt-1 capitalize">{report.resolution}</div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-2">
+                              <Button size="sm" variant="outline" disabled={isResolved} onClick={() => handleFraudAction(report.id, 'review')} className="inline-flex items-center gap-1">
+                                <Eye className="w-4 h-4" /> Review
+                              </Button>
+                              <Button size="sm" disabled={isResolved} onClick={() => handleFraudAction(report.id, 'resolve', 'dismissed')} className="inline-flex items-center gap-1">
+                                <CheckCircle2 className="w-4 h-4" /> Dismiss
+                              </Button>
+                              <Button size="sm" variant="danger" disabled={isResolved} onClick={() => handleFraudAction(report.id, 'resolve', 'confirmed')} className="inline-flex items-center gap-1">
+                                <XCircle className="w-4 h-4" /> Confirm &amp; Reject Campaign
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {fraudReports.length === 0 && <tr><td className="px-4 py-6 text-slate-500" colSpan={4}>No fraud reports yet.</td></tr>}
                   </tbody>
                 </table>

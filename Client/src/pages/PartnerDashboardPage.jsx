@@ -161,12 +161,12 @@ export function PartnerDashboardPage() {
 
   return <div className="bg-gray-50 min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-blue-600 font-semibold">Partner overview</p>
             <h1 className="text-2xl font-bold text-gray-900">Campaign Dashboard</h1>
           </div>
-          <Button variant="outline" className="flex items-center" onClick={loadDashboard}>
+          <Button variant="outline" className="flex items-center justify-center w-full sm:w-auto" onClick={loadDashboard}>
             <RefreshCcw className="w-4 h-4 mr-2" /> Refresh
           </Button>
         </div>

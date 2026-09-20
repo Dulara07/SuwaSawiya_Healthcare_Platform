@@ -75,7 +75,7 @@ export function HomePage() {
               <div>
                 <p className="text-2xl font-bold text-gray-900">150M+</p>
                 <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                  Raised
+                  {t('home.raised')}
                 </p>
               </div>
             </div>
@@ -86,7 +86,7 @@ export function HomePage() {
               <div>
                 <p className="text-2xl font-bold text-gray-900">12k+</p>
                 <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                  Donors
+                  {t('home.donors')}
                 </p>
               </div>
             </div>
@@ -97,7 +97,7 @@ export function HomePage() {
               <div>
                 <p className="text-2xl font-bold text-gray-900">100%</p>
                 <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                  Verified
+                  {t('home.verified')}
                 </p>
               </div>
             </div>
@@ -108,7 +108,7 @@ export function HomePage() {
               <div>
                 <p className="text-2xl font-bold text-gray-900">500+</p>
                 <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                  Patients
+                  {t('home.patients')}
                 </p>
               </div>
             </div>
@@ -122,14 +122,14 @@ export function HomePage() {
           <div className="flex justify-between items-end mb-10">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                Urgent Cases
+                {t('home.urgentCases')}
               </h2>
               <p className="text-gray-600 text-lg">
-                These patients need your help immediately. Every donation makes a difference.
+                {t('home.urgentCasesDescription')}
               </p>
             </div>
             <Link to="/campaigns" className="hidden md:flex items-center text-blue-600 font-medium hover:text-blue-700 hover:gap-2 transition-all gap-1">
-              View all campaigns <ArrowRight className="w-4 h-4" />
+              {t('home.viewAllCampaigns')} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -140,8 +140,8 @@ export function HomePage() {
           ) : error ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
               <AlertCircle className="w-8 h-8 text-yellow-600 mx-auto mb-3" />
-              <p className="text-yellow-800 font-medium mb-2">Unable to load live campaigns</p>
-              <p className="text-yellow-700 text-sm">Showing sample campaigns instead</p>
+              <p className="text-yellow-800 font-medium mb-2">{t('home.unableToLoad')}</p>
+              <p className="text-yellow-700 text-sm">{t('home.showingSample')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -154,7 +154,7 @@ export function HomePage() {
           <div className="mt-12 text-center md:hidden">
             <Link to="/campaigns">
               <Button variant="outline" fullWidth className="h-11">
-                View All Campaigns
+                {t('home.viewAllCampaigns')}
               </Button>
             </Link>
           </div>
@@ -166,9 +166,9 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900">
-              Browse by Category
+              {t('home.browseCategory')}
             </h2>
-            <p className="text-gray-600 mt-2 text-lg">Find campaigns in your area of interest</p>
+            <p className="text-gray-600 mt-2 text-lg">{t('home.categoryDescription')}</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {['Surgery', 'Cancer', 'Emergency', 'Transplant', 'Medication', 'Therapy'].map((cat, idx) => <Link key={cat} to={`/campaigns?category=${cat}`} className="group flex flex-col items-center justify-center p-6 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-200 transition-all duration-300 hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500" style={{transitionDelay: `${idx * 50}ms`}}>
@@ -185,14 +185,14 @@ export function HomePage() {
       <section className="py-16 md:py-24 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Want to fundraise for a patient?
+            {t('home.fundraiserTitle')}
           </h2>
           <p className="text-blue-100 text-lg mb-8">
-            Join our network of hospitals and NGOs to help patients get the medical care they need.
+            {t('home.fundraiserDescription')}
           </p>
           <Link to="/partner/register">
             <Button size="lg" variant="secondary" className="font-semibold shadow-lg shadow-blue-900/30 hover:shadow-xl transition-all">
-              Register as a Partner
+              {t('home.registerPartner')}
             </Button>
           </Link>
         </div>

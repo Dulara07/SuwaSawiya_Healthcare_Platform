@@ -3,13 +3,18 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.schemas.fraud_report import FraudReportCreate, FraudReportRead
 from app.models.fraud_report import FraudReport
-from app.auth.dependencies import get_current_user
+from app.models.campaign import Campaign
+from app.auth.dependencies import get_current_user, require_role
 from app.utils.db import get_db
 
 router = APIRouter(prefix="/fraud-reports", tags=["fraud-reports"])
 
 @router.post("/", response_model=FraudReportRead)
 def report_fraud(report_in: FraudReportCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    campaign = db.query(Campaign).filter(Campaign.id == report_in.campaign_id).first()
+    if campaign is None:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
     report = FraudReport(
         reporter_id=current_user.id,
         campaign_id=report_in.campaign_id,
@@ -22,5 +27,5 @@ def report_fraud(report_in: FraudReportCreate, db: Session = Depends(get_db), cu
     return report
 
 @router.get("/", response_model=List[FraudReportRead])
-def list_reports(db: Session = Depends(get_db)):
+def list_reports(db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
     return db.query(FraudReport).all()

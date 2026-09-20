@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle2, Upload, Building2, User, FileText } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
-import { register } from '../api';
+import { registerPartner } from '../api';
 
 export function PartnerRegisterPage() {
   const [step, setStep] = useState(1);
@@ -23,7 +23,7 @@ export function PartnerRegisterPage() {
   const [fundingGoal, setFundingGoal] = useState('');
   const [patientStory, setPatientStory] = useState('');
   
-  // Step 3: Documents (for future use)
+  // Step 3: Documents
   const [medicalReport, setMedicalReport] = useState(null);
   const [idProof, setIdProof] = useState(null);
 
@@ -98,8 +98,12 @@ export function PartnerRegisterPage() {
           full_name_length: registrationData.full_name.length,
         });
         
-        // Register the partner account
-        const response = await register(registrationData);
+        if (!medicalReport) {
+          throw new Error('Please upload a medical report before submitting');
+        }
+
+        // Register the partner account and store its medical report together.
+        const response = await registerPartner({ ...registrationData, medical_report: medicalReport });
         
         console.log('Registration successful:', response);
         setIsSubmitted(true);
@@ -150,7 +154,7 @@ export function PartnerRegisterPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+          <div className="px-4 sm:px-8 py-6 border-b border-gray-100 bg-gray-50/50">
             <h1 className="text-xl font-bold text-gray-900">
               {step === 1 && 'Organization Details'}
               {step === 2 && 'Initial Patient Registration'}
@@ -163,7 +167,7 @@ export function PartnerRegisterPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-8 space-y-6">
             {step === 1 && <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -223,7 +227,7 @@ export function PartnerRegisterPage() {
               </div>}
 
             {step === 2 && <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Patient Name
@@ -306,7 +310,7 @@ export function PartnerRegisterPage() {
                   </div>
                 </div>
                 
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer">
+                <label className="block border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer">
                   <FileText className="w-10 h-10 text-gray-400 mx-auto mb-3" />
                   <p className="text-sm font-medium text-gray-900">
                     Upload Medical Report
@@ -314,7 +318,14 @@ export function PartnerRegisterPage() {
                   <p className="text-xs text-gray-500 mt-1">
                     PDF or JPG up to 5MB
                   </p>
-                </div>
+                  <input
+                    type="file"
+                    accept="application/pdf,image/jpeg,image/png"
+                    className="sr-only"
+                    onChange={(e) => setMedicalReport(e.target.files?.[0] || null)}
+                  />
+                  {medicalReport && <p className="text-xs text-blue-700 mt-2">Selected: {medicalReport.name}</p>}
+                </label>
               </div>}
             
             {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>}

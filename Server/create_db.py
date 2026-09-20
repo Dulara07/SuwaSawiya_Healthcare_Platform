@@ -19,6 +19,10 @@ def create_all_tables():
         disbursement_columns = [column["name"] for column in inspector.get_columns("disbursements")]
     else:
         disbursement_columns = []
+    if "fraud_reports" in inspector.get_table_names():
+        fraud_report_columns = [column["name"] for column in inspector.get_columns("fraud_reports")]
+    else:
+        fraud_report_columns = []
     with engine.begin() as connection:
         if "registration_status" not in user_columns:
             connection.execute(text("ALTER TABLE users ADD COLUMN registration_status VARCHAR DEFAULT 'approved'"))
@@ -39,6 +43,12 @@ def create_all_tables():
             connection.execute(text("ALTER TABLE campaigns ADD COLUMN beneficiary_medical_condition TEXT"))
         if "document_type" not in document_columns:
             connection.execute(text("ALTER TABLE documents ADD COLUMN document_type VARCHAR"))
+        if "file_size" not in document_columns:
+            connection.execute(text("ALTER TABLE documents ADD COLUMN file_size INTEGER"))
+        if "user_id" not in document_columns:
+            connection.execute(text("ALTER TABLE documents ADD COLUMN user_id INTEGER REFERENCES users(id)"))
+        if fraud_report_columns and "resolution" not in fraud_report_columns:
+            connection.execute(text("ALTER TABLE fraud_reports ADD COLUMN resolution VARCHAR"))
         if not update_columns:
             connection.execute(text("""
                 CREATE TABLE IF NOT EXISTS campaign_updates (

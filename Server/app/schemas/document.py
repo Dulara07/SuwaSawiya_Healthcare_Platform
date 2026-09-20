@@ -13,6 +13,7 @@ class DocumentCreate(DocumentBase):
 class DocumentRead(DocumentBase):
     id: int
     uploaded_at: datetime
-    campaign_id: int
+    campaign_id: Optional[int] = None
+    user_id: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)

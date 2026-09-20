@@ -10,4 +10,5 @@ class FraudReport(Base):
     campaign_id = Column(Integer, ForeignKey("campaigns.id"))
     reason = Column(Text, nullable=False)
     status = Column(String, default="pending")  # pending, reviewed, resolved
+    resolution = Column(String, nullable=True)  # confirmed, dismissed (set when status becomes resolved)
     reported_at = Column(DateTime, default=datetime.datetime.utcnow)

@@ -4,11 +4,13 @@ import { Button } from '../components/ui/Button';
 import { ProgressBar } from '../components/ProgressBar';
 import { UrgencyBadge } from '../components/ui/Badge';
 import { DonationModal } from '../components/DonationModal';
-import { ShieldCheck, Calendar, User, Share2, AlertCircle } from 'lucide-react';
+import { ReportCampaignModal } from '../components/ReportCampaignModal';
+import { ShieldCheck, Calendar, User, Share2, AlertCircle, Flag } from 'lucide-react';
 import { fetchCampaignById, fetchCampaignUpdates } from '../api';
 export function CampaignDetailPage() {
   const { id } = useParams();
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [campaign, setCampaign] = useState(null);
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +57,7 @@ export function CampaignDetailPage() {
   }
   return <div className="bg-gray-50 min-h-screen pb-12">
       <DonationModal campaign={campaign} isOpen={isDonateModalOpen} onClose={() => setIsDonateModalOpen(false)} onDonationSuccess={loadCampaign} />
+      <ReportCampaignModal campaign={campaign} isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} />
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
@@ -177,6 +180,13 @@ export function CampaignDetailPage() {
                   <Share2 className="w-4 h-4 mr-2" /> Share Campaign
                 </Button>
               </div>
+
+              <button
+                onClick={() => setIsReportModalOpen(true)}
+                className="w-full flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-red-600 transition-colors mb-6"
+              >
+                <Flag className="w-3.5 h-3.5" /> Report this campaign
+              </button>
 
               <div className="bg-amber-50 rounded-lg p-4 flex items-start space-x-3">
                 <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />

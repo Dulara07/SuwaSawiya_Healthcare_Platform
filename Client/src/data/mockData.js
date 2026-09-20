@@ -117,7 +117,13 @@ export const MOCK_TRANSLATIONS = {
       about: 'About',
       contact: 'Contact',
       login: 'Login',
-      dashboard: 'Dashboard'
+      dashboard: 'Dashboard',
+      profile: 'Profile',
+      adminDashboard: 'Admin Dashboard',
+      donorLogin: 'Donor Login',
+      partnerLogin: 'Partner Login',
+      adminLogin: 'Admin Login',
+      logout: 'Log out'
     },
     hero: {
       title: 'Healing Together, One Donation at a Time',
@@ -129,6 +135,22 @@ export const MOCK_TRANSLATIONS = {
       urgency: 'Urgency',
       category: 'Category',
       search: 'Search campaigns...'
+    },
+    home: {
+      raised: 'Raised',
+      donors: 'Donors',
+      verified: 'Verified',
+      patients: 'Patients',
+      urgentCases: 'Urgent Cases',
+      urgentCasesDescription: 'These patients need your help immediately. Every donation makes a difference.',
+      viewAllCampaigns: 'View all campaigns',
+      unableToLoad: 'Unable to load live campaigns',
+      showingSample: 'Showing sample campaigns instead',
+      browseCategory: 'Browse by Category',
+      categoryDescription: 'Find campaigns in your area of interest',
+      fundraiserTitle: 'Want to fundraise for a patient?',
+      fundraiserDescription: 'Join our network of hospitals and NGOs to help patients get the medical care they need.',
+      registerPartner: 'Register as a Partner'
     },
     campaign: {
       raised: 'raised of',
@@ -148,7 +170,13 @@ export const MOCK_TRANSLATIONS = {
       about: 'අපි ගැන',
       contact: 'සම්බන්ධ වන්න',
       login: 'ඇතුල් වන්න',
-      dashboard: 'පාලක පුවරුව'
+      dashboard: 'පාලක පුවරුව',
+      profile: 'පැතිකඩ',
+      adminDashboard: 'පරිපාලක පුවරුව',
+      donorLogin: 'පරිත්‍යාගශීලී පිවිසුම',
+      partnerLogin: 'හවුල්කරු පිවිසුම',
+      adminLogin: 'පරිපාලක පිවිසුම',
+      logout: 'ඉවත් වන්න'
     },
     hero: {
       title: 'එක්ව සුවපත් කරමු',
@@ -160,6 +188,22 @@ export const MOCK_TRANSLATIONS = {
       urgency: 'හදිසිභාවය',
       category: 'වර්ගය',
       search: 'සොයන්න...'
+    },
+    home: {
+      raised: 'එකතු කළ මුදල',
+      donors: 'පරිත්‍යාගශීලීන්',
+      verified: 'තහවුරු කළ',
+      patients: 'රෝගීන්',
+      urgentCases: 'හදිසි අවශ්‍යතා',
+      urgentCasesDescription: 'මෙම රෝගීන්ට ඔබගේ උපකාරය වහාම අවශ්‍යයි. සෑම පරිත්‍යාගයක්ම වැදගත් වේ.',
+      viewAllCampaigns: 'සියලුම ව්‍යාපාර බලන්න',
+      unableToLoad: 'සජීවී ව්‍යාපාර පූරණය කළ නොහැක',
+      showingSample: 'ඒ වෙනුවට ආදර්ශ ව්‍යාපාර පෙන්වයි',
+      browseCategory: 'ප්‍රවර්ගය අනුව සොයන්න',
+      categoryDescription: 'ඔබ කැමති ක්ෂේත්‍රයේ ව්‍යාපාර සොයන්න',
+      fundraiserTitle: 'රෝගියෙකු වෙනුවෙන් අරමුදල් රැස් කිරීමට අවශ්‍යද?',
+      fundraiserDescription: 'රෝගීන්ට අවශ්‍ය වෛද්‍ය ප්‍රතිකාර ලබාගැනීමට අපගේ රෝහල් සහ රාජ්‍ය නොවන සංවිධාන ජාලයට එක්වන්න.',
+      registerPartner: 'හවුල්කරුවෙකු ලෙස ලියාපදිංචි වන්න'
     },
     campaign: {
       raised: 'රැස්කර ඇත',
@@ -179,7 +223,13 @@ export const MOCK_TRANSLATIONS = {
       about: 'எங்களைப் பற்றி',
       contact: 'தொடர்புக்கு',
       login: 'உள்நுழைய',
-      dashboard: 'டாஷ்போர்டு'
+      dashboard: 'கட்டுப்பாட்டு பலகை',
+      profile: 'சுயவிவரம்',
+      adminDashboard: 'நிர்வாகக் கட்டுப்பாட்டு பலகை',
+      donorLogin: 'நன்கொடையாளர் உள்நுழைவு',
+      partnerLogin: 'கூட்டாளர் உள்நுழைவு',
+      adminLogin: 'நிர்வாகி உள்நுழைவு',
+      logout: 'வெளியேறு'
     },
     hero: {
       title: 'ஒன்றாக குணப்படுத்துவோம்',
@@ -191,6 +241,22 @@ export const MOCK_TRANSLATIONS = {
       urgency: 'அவசரம்',
       category: 'வகை',
       search: 'தேடு...'
+    },
+    home: {
+      raised: 'திரட்டப்பட்டது',
+      donors: 'நன்கொடையாளர்கள்',
+      verified: 'சரிபார்க்கப்பட்டது',
+      patients: 'நோயாளிகள்',
+      urgentCases: 'அவசரத் தேவைகள்',
+      urgentCasesDescription: 'இந்த நோயாளிகளுக்கு உங்கள் உதவி உடனடியாகத் தேவை. ஒவ்வொரு நன்கொடையும் மாற்றத்தை ஏற்படுத்துகிறது.',
+      viewAllCampaigns: 'அனைத்து பிரச்சாரங்களையும் காண்க',
+      unableToLoad: 'நேரடி பிரச்சாரங்களை ஏற்ற முடியவில்லை',
+      showingSample: 'அதற்குப் பதிலாக மாதிரி பிரச்சாரங்கள் காட்டப்படுகின்றன',
+      browseCategory: 'வகை மூலம் தேடுக',
+      categoryDescription: 'உங்கள் விருப்பத் துறையில் பிரச்சாரங்களைக் கண்டறியுங்கள்',
+      fundraiserTitle: 'ஒரு நோயாளிக்காக நிதி திரட்ட விரும்புகிறீர்களா?',
+      fundraiserDescription: 'நோயாளிகளுக்குத் தேவையான மருத்துவ சேவையைப் பெற உதவும் எங்கள் மருத்துவமனைகள் மற்றும் தன்னார்வ அமைப்புகளின் வலையமைப்பில் இணையுங்கள்.',
+      registerPartner: 'கூட்டாளராகப் பதிவு செய்யுங்கள்'
     },
     campaign: {
       raised: 'திரட்டப்பட்டது',

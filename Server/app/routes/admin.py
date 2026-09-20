@@ -4,6 +4,7 @@ from typing import List
 from app.models.campaign import Campaign
 from app.models.user import User
 from app.models.fraud_report import FraudReport
+from app.schemas.fraud_report import FraudReportResolve
 from app.models.donation import Donation
 from app.models.document import Document
 from app.models.disbursement import Disbursement
@@ -53,6 +54,7 @@ def _fraud_payload(report: FraudReport):
         "campaign_id": report.campaign_id,
         "reason": report.reason,
         "status": report.status,
+        "resolution": getattr(report, "resolution", None),
         "reported_at": report.reported_at,
     }
 
@@ -198,16 +200,44 @@ def review_fraud_report(report_id: int, db: Session = Depends(get_db), admin = D
         raise HTTPException(status_code=404, detail="Fraud report not found")
     report.status = "reviewed"
     db.commit()
+    try:
+        log_action(admin.id, "review_fraud_report", "fraud_report", report.id, details=f"campaign_id={report.campaign_id}")
+    except Exception:
+        pass
     return {"message": "Fraud report reviewed", "report_id": report.id}
 
 @router.post("/fraud-reports/{report_id}/resolve")
-def resolve_fraud_report(report_id: int, db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
+def resolve_fraud_report(report_id: int, payload: FraudReportResolve, db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
     report = db.query(FraudReport).filter(FraudReport.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Fraud report not found")
+
     report.status = "resolved"
+    report.resolution = payload.verdict
     db.commit()
-    return {"message": "Fraud report resolved", "report_id": report.id}
+    try:
+        log_action(admin.id, "resolve_fraud_report", "fraud_report", report.id, details=f"verdict={payload.verdict} campaign_id={report.campaign_id}")
+    except Exception:
+        pass
+
+    campaign_rejected = False
+    if payload.verdict == "confirmed":
+        campaign = db.query(Campaign).filter(Campaign.id == report.campaign_id).first()
+        if campaign and campaign.status != "rejected":
+            campaign.status = "rejected"
+            db.commit()
+            campaign_rejected = True
+            try:
+                log_action(admin.id, "reject_campaign", "campaign", campaign.id, details=f"auto-rejected via fraud_report={report.id}")
+            except Exception:
+                pass
+
+    return {
+        "message": "Fraud report resolved",
+        "report_id": report.id,
+        "verdict": payload.verdict,
+        "campaign_rejected": campaign_rejected,
+    }
 
 
 @router.get("/disbursements", response_model=List[dict])

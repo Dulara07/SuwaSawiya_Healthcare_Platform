@@ -44,6 +44,26 @@ export async function register(data) {
   }
   return response.json();
 }
+
+export async function registerPartner(data) {
+  const formData = new FormData();
+  formData.append('username', data.username);
+  formData.append('password', data.password);
+  formData.append('email', data.email);
+  formData.append('full_name', data.full_name);
+  formData.append('role', 'partner');
+  if (data.medical_report) formData.append('medical_report', data.medical_report);
+
+  const response = await fetch(`${API_BASE_URL}/auth/register/partner`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Partner registration failed');
+  }
+  return response.json();
+}
 export async function login(username, password, role = 'donor') {
   const loginPath = role === 'admin' ? '/auth/login/admin' : role === 'partner' ? '/auth/login/partner' : '/auth/login/donor';
   const response = await fetch(`${API_BASE_URL}${loginPath}`, {
@@ -380,6 +400,22 @@ export async function rejectPatient(userId) {
   return response.json();
 }
 
+export async function createFraudReport({ campaignId, reason }) {
+  const response = await fetch(`${API_BASE_URL}/fraud-reports/`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ campaign_id: campaignId, reason }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to submit report');
+  }
+  return response.json();
+}
+
 export async function fetchFraudReports() {
   const response = await fetch(`${API_BASE_URL}/admin/fraud-reports`, {
     headers: getAuthHeaders(),
@@ -397,12 +433,19 @@ export async function reviewFraudReport(reportId) {
   return response.json();
 }
 
-export async function resolveFraudReport(reportId) {
+export async function resolveFraudReport(reportId, verdict) {
   const response = await fetch(`${API_BASE_URL}/admin/fraud-reports/${reportId}/resolve`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ verdict }),
   });
-  if (!response.ok) throw new Error('Failed to resolve fraud report');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to resolve fraud report');
+  }
   return response.json();
 }
 
